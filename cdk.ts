@@ -1,8 +1,4 @@
 import * as cdk from 'aws-cdk-lib';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as deployment from 'aws-cdk-lib/aws-s3-deployment';
-import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
-import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
@@ -15,35 +11,6 @@ const app = new cdk.App();
 
 const stack = new cdk.Stack(app, 'CartServiceStack', {
   env: { region : process.env.AWS_REGION! },
-});
-
-const cartApiBucket = new s3.Bucket(stack, 'CartApiBucket', {
-    bucketName: 'awscdcartapi',
-});
-
-const OAI = new cloudfront.OriginAccessIdentity(stack, 'CartApiOAI', {
-        comment: cartApiBucket.bucketName,
-    },
-);
-
-cartApiBucket.grantRead(OAI);
-
-const CFDistribution = new cloudfront.Distribution(stack, 'CartApiCFD', {
-    defaultBehavior: {
-        origin: new origins.S3Origin(cartApiBucket, {
-            originAccessIdentity: OAI,
-        }),
-        viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-    },
-    defaultRootObject: 'index.html',
-    errorResponses: [
-        {
-            httpStatus: 404,
-            responseHttpStatus: 200,
-            responsePagePath: '/index.html',
-        },
-    ],
 });
 
 const sharedLambdaProps: Partial<NodejsFunctionProps> = {
@@ -71,14 +38,15 @@ const sharedLambdaProps: Partial<NodejsFunctionProps> = {
 };
 
 // Create CartApiLambda
-const cartApi = new NodejsFunction(stack, 'CartApiLambda', {
+const cartApiLambda = new NodejsFunction(stack, 'CartApiLambda', {
     ...sharedLambdaProps,
     functionName: 'CartApi',
-    entry: 'src/lambda_handlers/cartApi.ts',
+    entry: 'dist/src/main.js',
+    handler: 'handler',
   });
 
 // init HttpApi
-const api = new apiGateway.HttpApi(stack, 'ProductApi', {
+const api = new apiGateway.HttpApi(stack, 'CartApi', {
     corsPreflight: {
       allowHeaders: ['*'],
       allowOrigins: ['*'],
@@ -88,15 +56,8 @@ const api = new apiGateway.HttpApi(stack, 'ProductApi', {
 
 // Add / route
 api.addRoutes({
-    integration: new HttpLambdaIntegration('cartApiIntegration', cartApi),
-    path: '/',
+    integration: new HttpLambdaIntegration('cartApiIntegration', cartApiLambda),
+    path: '/{proxy+}',
     methods: [apiGateway.HttpMethod.ANY],
   });
 
-// Host cartApi bucket on cloudfront
-const BucketHosting = new deployment.BucketDeployment(stack, 'AWSStoreBucketDeployment', {
-    destinationBucket: cartApiBucket,
-    sources: [deployment.Source.asset('./dist')],
-    distribution: CFDistribution,
-    distributionPaths: ['/*'],
-});
