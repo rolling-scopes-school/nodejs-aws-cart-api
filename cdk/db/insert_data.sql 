@@ -1,0 +1,12 @@
+INSERT INTO carts (id, user_id, created_at, updated_at, status)
+VALUES
+  ('a1b2c3d4-e5f6-47a8-b9c0-d1e2f3a4b5c6', 'f1e2d3c4-b5a6-47a8-b9c0-a1b2c3d4e5f6', '2023-01-01T00:00:00.000Z', '2023-01-01T00:00:00.000Z', 'OPEN'),
+  ('b2c3d4e5-f6a7-48b9-c0d1-e2f3a4b5c6d7', 'e2f3d4c5-a6b7-48b9-c0d1-f1e2d3c4b5a6', '2023-01-02T00:00:00.000Z', '2023-01-02T00:00:00.000Z', 'ORDERED');
+
+INSERT INTO cart_items (cart_id, product_id, count)
+VALUES
+  ('a1b2c3d4-e5f6-47a8-b9c0-d1e2f3a4b5c6', 'p1a2b3c4-d5e6-47a8-b9c0-f1e2d3c4b5a6', 2),
+  ('a1b2c3d4-e5f6-47a8-b9c0-d1e2f3a4b5c6', 'p2b3c4d5-e6f7-48b9-c0d1-e2f3d4c5b6a7', 1),
+  ('b2c3d4e5-f6a7-48b9-c0d1-e2f3a4b5c6d7', 'p1a2b3c4-d5e6-47a8-b9c0-f1e2d3c4b5a6', 3),
+  ('b2c3d4e5-f6a7-48b9-c0d1-e2f3a4b5c6d7', 'p3c4d5e6-f7a8-49b0-c1d2-f3e4d5c6b7a8', 1),
+  ('b2c3d4e5-f6a7-48b9-c0d1-e2f3a4b5c6d7', 'p2b3c4d5-e6f7-48b9-c0d1-e2f3d4c5b6a7', 1);

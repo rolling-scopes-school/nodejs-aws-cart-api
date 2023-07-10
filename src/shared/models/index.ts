@@ -4,4 +4,5 @@ import { User } from '../../users';
 
 export interface AppRequest extends Request {
   user?: User
+  statusCode?: number
 }
