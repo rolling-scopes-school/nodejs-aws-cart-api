@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Callback, Context, Handler } from 'aws-lambda';
 import serverlessExpress from "@vendia/serverless-express";
 import helmet from 'helmet';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 let server: Handler;
 
