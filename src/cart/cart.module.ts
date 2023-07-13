@@ -5,10 +5,10 @@ import { OrderModule } from '../order/order.module';
 import { CartController } from './cart.controller';
 import { CartService } from './services';
 
-import { DatabaseModule } from 'src/database.module';
+// import { DatabaseModule } from 'src/database.module';
 
 @Module({
-  imports: [ OrderModule, DatabaseModule ],
+  imports: [ OrderModule ],
   providers: [ CartService ],
   controllers: [ CartController ]
 })
