@@ -43,6 +43,7 @@ const cartApiLambda = new NodejsFunction(stack, 'CartApiLambda', {
     functionName: 'CartApi',
     entry: 'dist/src/main.js',
     handler: 'handler',
+    timeout: cdk.Duration.seconds(10),
   });
 
 // init HttpApi

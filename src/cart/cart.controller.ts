@@ -1,9 +1,11 @@
-import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
-import { OrderService } from '../order';
+import { Order, OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
+import pg from '../index';
+import { Knex } from 'knex';
 import { ApiTags } from '@nestjs/swagger';
 
 interface RequestBody {
@@ -39,7 +41,7 @@ export class CartController {
   @Put()
   async updateUserCart(@Req() req: AppRequest, @Body() body: RequestBody) { // TODO: validate body payload...
     const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body)
-
+    console.log('Passing the following parameters:', body)
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
@@ -73,20 +75,35 @@ export class CartController {
       throw new BadRequestException('Cart is empty');
     }
 
+    let order: Order;
+    let cartStatus: string;
     const { id: cartId, items } = cart;
-    // const total = calculateCartTotal(cart); TODO
-    const order = await this.orderService.create({
-      ...body,
-      userId: userId,
-      cartId: cartId,
-      items,
-      total: 1, // TODO
-    });
-    this.cartService.removeByUserId(userId); // TO DO: write a plpgsql function to change status to ordered
+    // checkout transaction
+    let trx = await pg.transaction();
+    try {
+      console.log('checkout, transaction is about to start for', userId, cart);
+      // const total = calculateCartTotal(cart); TODO
+      const order = await this.orderService.create(trx, {
+        ...body,
+        user_id: userId,
+        cart_id: cartId,
+        total: 1, // TODO
+      }) as any as Order;
+      console.log('order created, changing the cart status');
+      const [{ status }] = await this.cartService.changeStatus(trx, cartId);
+      await trx.commit();
+      cartStatus = status;
+    } catch (error) {
+      await trx.rollback();
+      throw new InternalServerErrorException(`Transaction failed: ${error}`);
+    }
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: { order }
+      data: {
+        cart_status: cartStatus,
+        order: {items: items, ...order} 
+      }
     }
   }
 }

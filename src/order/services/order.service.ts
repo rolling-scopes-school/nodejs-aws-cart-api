@@ -1,39 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { v4 } from 'uuid';
-
 import { Order } from '../models';
+import { Knex } from 'knex';
+import pg from '../../index';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {}
 
-  findById(orderId: string): Order {
-    return this.orders[ orderId ];
+  async findById(orderId: string): Promise<Order> {
+    return await pg('orders').where('id', orderId).first();
   }
 
-  create(data: any) {
-    const id = v4()
+  async create(trx: Knex.Transaction<any, any[]>, data: Order) {
+    console.log('Creating transaction', data)
     const order = {
       ...data,
-      id,
-      status: 'inProgress',
+      status: 'OPEN',
     };
-
-    this.orders[ id ] = order;
-
-    return order;
+    return (await trx('orders').insert(order).returning('*'))[0] as any as Order
   }
 
-  update(orderId, data) {
-    const order = this.findById(orderId);
+  async update(orderId: string, data: Order) {
+    const order = await this.findById(orderId);
 
     if (!order) {
       throw new Error('Order does not exist.');
     }
 
-    this.orders[ orderId ] = {
-      ...data,
-      id: orderId,
-    }
+    return pg('orders')
+    .where('id', orderId)
+    .update({...order, ...data});
   }
 }
