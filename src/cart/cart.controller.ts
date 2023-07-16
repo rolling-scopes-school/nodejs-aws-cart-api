@@ -9,8 +9,13 @@ import { Knex } from 'knex';
 import { ApiTags } from '@nestjs/swagger';
 
 interface RequestBody {
-  product_id: string;
-  count: number;
+  product: {
+    id: string,
+    price: number,
+    title: string,
+    description: string,
+  },
+  count: number
 }
 
 @ApiTags('app')
@@ -32,7 +37,7 @@ export class CartController {
       message: 'OK',
       data: { 
         cart, 
-        //total: calculateCartTotal(cart) TODO
+        total: 666
       },
     }
   }
@@ -40,14 +45,14 @@ export class CartController {
   @UseGuards(BasicAuthGuard)
   @Put()
   async updateUserCart(@Req() req: AppRequest, @Body() body: RequestBody) { // TODO: validate body payload...
-    const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body)
     console.log('Passing the following parameters:', body)
+    const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body)
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
       data: {
         cart,
-        //total: calculateCartTotal(cart), TODO
+        total: 666
       }
     }
   }
@@ -82,12 +87,12 @@ export class CartController {
     let trx = await pg.transaction();
     try {
       console.log('checkout, transaction is about to start for', userId, cart);
-      // const total = calculateCartTotal(cart); TODO
+      const total = 666
       const order = await this.orderService.create(trx, {
-        ...body,
         user_id: userId,
         cart_id: cartId,
-        total: 1, // TODO
+        total: total,
+        ...body,
       }) as any as Order;
       console.log('order created, changing the cart status');
       const [{ status }] = await this.cartService.changeStatus(trx, cartId);

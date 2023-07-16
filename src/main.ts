@@ -6,8 +6,6 @@ import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 
-
-
 let server: Handler;
 
 async function bootstrap(): Promise<Handler> {

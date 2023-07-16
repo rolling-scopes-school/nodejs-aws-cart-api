@@ -4,8 +4,13 @@ import { Knex } from 'knex';
 import { Cart } from '../models';
 
 interface RequestBody {
-  product_id: string;
-  count: number;
+  product: {
+    id: string,
+    price: number,
+    title: string,
+    description: string,
+  },
+  count: number
 }
 
 @Injectable()
@@ -25,7 +30,17 @@ export class CartService {
       const user_cart_items = await pg('cart_items').join('products', 'cart_items.product_id', 'products.id')
         .where('cart_id', user_cart.id);
       // const user_cart_full = await pg('cart_full').where('user_id = ?', [userId]);
-      return { ...user_cart, items: [...user_cart_items] }
+      const product_info = user_cart_items.map((item) => ({
+        product: {
+          id: item.product_id,
+          title: item.title,
+          description: item.description,
+          price: item.price,
+        },
+        count: item.count,
+      }));
+      user_cart.items = product_info;
+      return user_cart
     } catch (err) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
@@ -35,7 +50,7 @@ export class CartService {
     try {
 
       const create_by_userid = await pg.raw('SELECT * FROM create_cart(?::UUID)', userId)
-      return create_by_userid
+      return await this.findByUserId(userId)
     } catch (err) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
@@ -47,28 +62,26 @@ export class CartService {
       if (user_cart) {
         return user_cart;
       };
-      console.log('No such user found, creating...');
+      console.log('No open cart is found for this user, creating...');
       return await this.createByUserId(userId);
     } catch (err) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async updateByUserId(userId: string, RequestBody): Promise<Cart> {
+  async updateByUserId(userId: string, RequestBody: RequestBody): Promise<Cart> {
     try {
       const productCount = RequestBody.count;
-      const productId = RequestBody.product_id;
+      const productId = RequestBody.product.id;
 
       const user_cart = await this.findOrCreateByUserId(userId);
 
       const update_cart = await pg.raw(
         'SELECT * FROM cart_add(?::UUID, ?::UUID, ?::INTEGER)', [user_cart.id, productId, productCount]
         );
+      
       console.log('Cart Updated', user_cart.id);
-      const user_cart_items = await pg('cart_items').join('products', 'cart_items.product_id', 'products.id')
-        .where('cart_id', user_cart.id);
-
-      return { ...user_cart, items: [...user_cart_items] }
+      return await this.findByUserId(userId)
 
     } catch (err) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
@@ -87,7 +100,7 @@ export class CartService {
   }
 
   async changeStatus(trx: Knex.Transaction<any, any[]>, cartId:string) {
-    console.log('we are changing status of cart', cartId)
+    console.log('Changing status of cart', cartId)
     return await trx('carts')
       .where('id', cartId)
       .update({ status : 'ORDERED' })
