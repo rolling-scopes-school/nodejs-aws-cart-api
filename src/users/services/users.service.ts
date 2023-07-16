@@ -1,28 +1,19 @@
 import { Injectable } from '@nestjs/common';
-
-import { v4 } from 'uuid';
-
 import { User } from '../models';
+import pg from '../../index';
 
 @Injectable()
 export class UsersService {
   private readonly users: Record<string, User>;
-
-  constructor() {
-    this.users = {}
+  // find a user in the users table
+  async findOne(name: string): Promise<User> {
+    const user = await pg('users').where('name', name).first();
+    return user
   }
-
-  findOne(userId: string): User {
-    return this.users[ userId ];
-  }
-
-  createOne({ name, password }: User): User {
-    const id = v4();
-    const newUser = { id: name || id, name, password };
-
-    this.users[ id ] = newUser;
-
-    return newUser;
+  // create in case of absence
+  async createOne({ name, password }: User): Promise<User> {
+    const new_user = await pg.raw('SELECT * FROM create_user(?::VARCHAR, ?::VARCHAR)', [name, password]) 
+    return new_user;
   }
 
 }

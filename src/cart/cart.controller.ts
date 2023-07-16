@@ -1,12 +1,19 @@
-import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus } from '@nestjs/common';
-
-// import { BasicAuthGuard, JwtAuthGuard } from '../auth';
-import { OrderService } from '../order';
+import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { BasicAuthGuard } from '../auth';
+import { Order, OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
-
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
+import pg from '../index';
+import { Knex } from 'knex';
+import { ApiTags } from '@nestjs/swagger';
 
+interface RequestBody {
+  product_id: string;
+  count: number;
+}
+
+@ApiTags('app')
 @Controller('api/profile/cart')
 export class CartController {
   constructor(
@@ -14,37 +21,39 @@ export class CartController {
     private orderService: OrderService
   ) { }
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+
+  @UseGuards(BasicAuthGuard)
   @Get()
-  findUserCart(@Req() req: AppRequest) {
-    const cart = this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
+  async findUserCart(@Req() req: AppRequest) {
+    const cart = await this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
 
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: { cart, total: calculateCartTotal(cart) },
+      data: { 
+        cart, 
+        //total: calculateCartTotal(cart) TODO
+      },
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Put()
-  updateUserCart(@Req() req: AppRequest, @Body() body) { // TODO: validate body payload...
-    const cart = this.cartService.updateByUserId(getUserIdFromRequest(req), body)
-
+  async updateUserCart(@Req() req: AppRequest, @Body() body: RequestBody) { // TODO: validate body payload...
+    const cart = await this.cartService.updateByUserId(getUserIdFromRequest(req), body)
+    console.log('Passing the following parameters:', body)
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
       data: {
         cart,
-        total: calculateCartTotal(cart),
+        //total: calculateCartTotal(cart), TODO
       }
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+
+  @UseGuards(BasicAuthGuard)
   @Delete()
   clearUserCart(@Req() req: AppRequest) {
     this.cartService.removeByUserId(getUserIdFromRequest(req));
@@ -55,38 +64,46 @@ export class CartController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+
+  @UseGuards(BasicAuthGuard)
   @Post('checkout')
-  checkout(@Req() req: AppRequest, @Body() body) {
+  async checkout(@Req() req: AppRequest, @Body() body) {
     const userId = getUserIdFromRequest(req);
-    const cart = this.cartService.findByUserId(userId);
+    const cart = await this.cartService.findByUserId(userId);
 
     if (!(cart && cart.items.length)) {
-      const statusCode = HttpStatus.BAD_REQUEST;
-      req.statusCode = statusCode
-
-      return {
-        statusCode,
-        message: 'Cart is empty',
-      }
+      throw new BadRequestException('Cart is empty');
     }
 
+    let order: Order;
+    let cartStatus: string;
     const { id: cartId, items } = cart;
-    const total = calculateCartTotal(cart);
-    const order = this.orderService.create({
-      ...body, // TODO: validate and pick only necessary data
-      userId,
-      cartId,
-      items,
-      total,
-    });
-    this.cartService.removeByUserId(userId);
-
+    // checkout transaction
+    let trx = await pg.transaction();
+    try {
+      console.log('checkout, transaction is about to start for', userId, cart);
+      // const total = calculateCartTotal(cart); TODO
+      const order = await this.orderService.create(trx, {
+        ...body,
+        user_id: userId,
+        cart_id: cartId,
+        total: 1, // TODO
+      }) as any as Order;
+      console.log('order created, changing the cart status');
+      const [{ status }] = await this.cartService.changeStatus(trx, cartId);
+      await trx.commit();
+      cartStatus = status;
+    } catch (error) {
+      await trx.rollback();
+      throw new InternalServerErrorException(`Transaction failed: ${error}`);
+    }
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: { order }
+      data: {
+        cart_status: cartStatus,
+        order: {items: items, ...order} 
+      }
     }
   }
 }

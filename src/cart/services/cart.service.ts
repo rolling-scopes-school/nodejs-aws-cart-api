@@ -1,55 +1,97 @@
-import { Injectable } from '@nestjs/common';
-
-import { v4 } from 'uuid';
-
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import pg from '../../index';
+import { Knex } from 'knex';
 import { Cart } from '../models';
+
+interface RequestBody {
+  product_id: string;
+  count: number;
+}
 
 @Injectable()
 export class CartService {
-  private userCarts: Record<string, Cart> = {};
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
-  }
+  async findByUserId(userId: string): Promise<Cart> {
+    try {
 
-  createByUserId(userId: string) {
-    const id = v4();
-    const userCart = {
-      id,
-      items: [],
-    };
+      const cart_status = 'OPEN'
+      const user_cart = await pg('carts').where('user_id', userId)
+        .where('status', cart_status).first();
 
-    this.userCarts[ userId ] = userCart;
+      if (!user_cart) {
+        return null
+      }
 
-    return userCart;
-  }
-
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
-
-    if (userCart) {
-      return userCart;
+      const user_cart_items = await pg('cart_items').join('products', 'cart_items.product_id', 'products.id')
+        .where('cart_id', user_cart.id);
+      // const user_cart_full = await pg('cart_full').where('user_id = ?', [userId]);
+      return { ...user_cart, items: [...user_cart_items] }
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
+  };
 
-    return this.createByUserId(userId);
-  }
+  async createByUserId(userId: string): Promise<Cart> {
+    try {
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
-
-    const updatedCart = {
-      id,
-      ...rest,
-      items: [ ...items ],
+      const create_by_userid = await pg.raw('SELECT * FROM create_cart(?::UUID)', userId)
+      return create_by_userid
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }
+  };
 
-    this.userCarts[ userId ] = { ...updatedCart };
-
-    return { ...updatedCart };
+  async findOrCreateByUserId(userId: string): Promise<Cart> {
+    try {
+      const user_cart = await this.findByUserId(userId);
+      if (user_cart) {
+        return user_cart;
+      };
+      console.log('No such user found, creating...');
+      return await this.createByUserId(userId);
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
+  async updateByUserId(userId: string, RequestBody): Promise<Cart> {
+    try {
+      const productCount = RequestBody.count;
+      const productId = RequestBody.product_id;
+
+      const user_cart = await this.findOrCreateByUserId(userId);
+
+      const update_cart = await pg.raw(
+        'SELECT * FROM cart_add(?::UUID, ?::UUID, ?::INTEGER)', [user_cart.id, productId, productCount]
+        );
+      console.log('Cart Updated', user_cart.id);
+      const user_cart_items = await pg('cart_items').join('products', 'cart_items.product_id', 'products.id')
+        .where('cart_id', user_cart.id);
+
+      return { ...user_cart, items: [...user_cart_items] }
+
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async removeByUserId(userId): Promise<void> {
+    try {
+      console.log('Removing user', userId)
+      const cart_to_remove = await this.findByUserId(userId);
+      await pg('cart_items').where('cart_id', cart_to_remove.id).del();
+      await pg('carts').where('user_id', userId).del();
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async changeStatus(trx: Knex.Transaction<any, any[]>, cartId:string) {
+    console.log('we are changing status of cart', cartId)
+    return await trx('carts')
+      .where('id', cartId)
+      .update({ status : 'ORDERED' })
+      .returning('status')
   }
 
 }
