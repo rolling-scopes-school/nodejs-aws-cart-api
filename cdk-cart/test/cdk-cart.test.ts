@@ -1,13 +1,13 @@
 // import * as cdk from 'aws-cdk-lib';
 // import { Template } from 'aws-cdk-lib/assertions';
-// import * as CdkCartService from '../lib/cdk-cart-service-stack';
+// import * as CdkCart from '../lib/cdk-cart-stack';
 
 // example test. To run these tests, uncomment this file along with the
-// example resource in lib/cdk-cart-service-stack.ts
+// example resource in lib/cdk-cart-stack.ts
 test('SQS Queue Created', () => {
 //   const app = new cdk.App();
 //     // WHEN
-//   const stack = new CdkCartService.CdkCartServiceStack(app, 'MyTestStack');
+//   const stack = new CdkCart.CdkCartStack(app, 'MyTestStack');
 //     // THEN
 //   const template = Template.fromStack(stack);
 
