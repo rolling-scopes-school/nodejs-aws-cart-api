@@ -15,7 +15,7 @@ export class CdkCartStack extends cdk.Stack {
       runtime: Runtime.NODEJS_20_X,
     });
     
-    const restApi = new RestApi(this, 'CustomerLambdaApi', {
+    const restApi = new RestApi(this, 'LambdaApi', {
       restApiName: 'NestJS REST API'
     });
     
