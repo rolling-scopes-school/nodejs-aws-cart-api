@@ -15,6 +15,7 @@
   "include": [
     "src/**/*.ts",
    ".eslintrc.js",
-    "cdk-cart-service/lib/cdk-cart-service-stack.ts"
+    "cdk-cart-service/lib/cdk-cart-service-stack.ts",
+    "**/*.ts"
   ]
 }
