@@ -1,21 +1,62 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { AwsStack } from '../lib/aws-stack';
+import * as dotenv from 'dotenv';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha';
+import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
+
+const environment = {};
+dotenv.config({ processEnv: environment });
 
 const app = new cdk.App();
-new AwsStack(app, 'AwsStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const stack = new cdk.Stack(app, 'CartServiceStack', {
+  env: {
+    region: 'eu-north-1',
+  },
+});
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+const cartService = new NodejsFunction(stack, 'CartServiceLambda', {
+  runtime: Runtime.NODEJS_18_X,
+  functionName: 'cartService',
+  entry: '../dist/main.js',
+  environment,
+  bundling: {
+    externalModules: [
+      'mysql',
+      'mysql2',
+      'pg-query-stream',
+      'better-sqlite3',
+      'sqlite3',
+      'tedious',
+      'better-sqlite3',
+      'oracledb',
+      '@nestjs/microservices',
+      '@nestjs/microservices/microservices-module',
+      '@nestjs/websockets/socket-module',
+    ],
+  },
+});
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+const api = new apiGateway.HttpApi(stack, 'CartApiGateway', {
+  corsPreflight: {
+    allowHeaders: ['*'],
+    allowOrigins: ['*'],
+    allowMethods: [apiGateway.CorsHttpMethod.ANY],
+  },
+});
+
+api.addRoutes({
+  path: '/{api+}',
+  methods: [apiGateway.HttpMethod.ANY],
+  integration: new HttpLambdaIntegration(
+    'CartServiceLambdaIntegration',
+    cartService,
+  ),
+});
+
+new cdk.CfnOutput(stack, 'ApiUrl', {
+  value: api.url || '',
 });
