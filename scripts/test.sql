@@ -97,8 +97,8 @@ INSERT INTO orders (user_id, cart_id, payment, delivery, comments, status, total
 SELECT
   users.id AS user_id,
   carts.id AS cart_id,
-  '{"currency": "btc"}'::jsonb AS payment,
-  '{"city": "ny"}'::jsonb AS delivery,
+  '{"type": "crypto"}'::jsonb AS payment,
+  '{"type": "post"}'::jsonb AS delivery,
   'no rush' AS comments,
   'on review' AS status,
   ceiling(random() * 500) AS total
