@@ -1,28 +1,23 @@
 import { Injectable } from '@nestjs/common';
 
-import { v4 } from 'uuid';
-
 import { User } from '../models';
+import { InjectKnex } from 'nestjs-knex';
+import { Knex } from 'knex';
 
 @Injectable()
 export class UsersService {
-  private readonly users: Record<string, User>;
+  constructor(@InjectKnex() private readonly knex: Knex) {}
 
-  constructor() {
-    this.users = {}
+  async findOne(userId: string): Promise<User> {
+    return this.knex('users').where({ id: userId }).first();
   }
 
-  findOne(userId: string): User {
-    return this.users[ userId ];
-  }
-
-  createOne({ name, password }: User): User {
-    const id = v4();
-    const newUser = { id: name || id, name, password };
-
-    this.users[ id ] = newUser;
-
+  async createOne({ name, password }: User): Promise<User> {
+    const [newUser] = await this.knex('users').insert({ name, password }, [
+      'id',
+      'name',
+      'password',
+    ]);
     return newUser;
   }
-
 }

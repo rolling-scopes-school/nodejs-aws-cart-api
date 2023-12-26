@@ -1,55 +1,63 @@
 import { Injectable } from '@nestjs/common';
 
-import { v4 } from 'uuid';
-
 import { Cart } from '../models';
+import { InjectKnex } from 'nestjs-knex';
+import { Knex } from 'knex';
 
 @Injectable()
 export class CartService {
-  private userCarts: Record<string, Cart> = {};
+  constructor(@InjectKnex() private readonly knex: Knex) {}
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
+  async findByUserId(userId: string): Promise<Cart> {
+    const [cart] = await this.knex('carts').where({ user_id: userId }).first();
+    if (cart) {
+      cart.items = await this.knex('cart_items').where({ cart_id: cart.id });
+    }
+    return cart;
   }
 
-  createByUserId(userId: string) {
-    const id = v4();
-    const userCart = {
+  async createByUserId(userId: string): Promise<Cart> {
+    const [id] = await this.knex('carts')
+      .insert({ user_id: userId })
+      .returning('id');
+    return {
       id,
       items: [],
     };
+  }
 
-    this.userCarts[ userId ] = userCart;
+  async findOrCreateByUserId(userId: string): Promise<Cart> {
+    let userCart = await this.findByUserId(userId);
+    if (!userCart) {
+      userCart = await this.createByUserId(userId);
+    }
 
     return userCart;
   }
 
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
+  async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
+    const cart = await this.findOrCreateByUserId(userId);
 
-    if (userCart) {
-      return userCart;
+    await this.knex('cart_items').where({ cart_id: cart.id }).del();
+    for (const item of items) {
+      await this.knex('cart_items').insert({
+        cart_id: cart.id,
+        product_id: item.product.id,
+        count: item.count,
+      });
+    }
+    cart.items = items;
+    return cart;
+  }
+
+  async removeByUserId(userId: string): Promise<void> {
+    const cart = await this.findByUserId(userId);
+
+    if (!cart) {
+      return;
     }
 
-    return this.createByUserId(userId);
+    await this.knex('cart_items').where({ cart_id: cart.id }).del();
+    await this.knex('carts').where({ id: cart.id }).del();
   }
-
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
-
-    const updatedCart = {
-      id,
-      ...rest,
-      items: [ ...items ],
-    }
-
-    this.userCarts[ userId ] = { ...updatedCart };
-
-    return { ...updatedCart };
-  }
-
-  removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
-  }
-
 }
