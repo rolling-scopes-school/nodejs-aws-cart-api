@@ -1,9 +1,10 @@
-# compiled output
+# We should ignore anything that is not related to build context.
+# This helps avoid sending unwanted files and directories to the builder,
+# improving build speed, especially when using a remote builder.
+
+# Compiled output
 /dist
 /node_modules
-
-# env
-.env
 
 # Logs
 logs
@@ -19,6 +20,7 @@ lerna-debug.log*
 # Tests
 /coverage
 /.nyc_output
+/test
 
 # IDEs and editors
 /.idea
@@ -39,3 +41,9 @@ lerna-debug.log*
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# DB
+/scripts
+
+# AWS
+/aws
