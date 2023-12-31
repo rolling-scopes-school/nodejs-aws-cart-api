@@ -8,8 +8,11 @@ import { Knex } from 'knex';
 export class UsersService {
   constructor(@InjectKnex() private readonly knex: Knex) {}
 
-  async findOne(userId: string): Promise<User> {
-    return this.knex('users').where({ id: userId }).first();
+  // async findOne(userId: string): Promise<User> {
+  //   return this.knex('users').where({ id: userId }).first();
+  // }
+  async findOne(userName: string): Promise<User> {
+    return this.knex('users').where({ name: userName }).first();
   }
 
   async createOne({ name, password }: User): Promise<User> {
