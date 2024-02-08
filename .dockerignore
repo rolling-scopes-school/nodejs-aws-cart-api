@@ -1,0 +1,11 @@
+# The dependencies should be installed inside the container
+node_modules
+
+# This log file is created when we get issues with npm commands
+npm-debug.log
+
+# This determines what should be ignored in container. No reason to include in container
+.dockerignore
+
+# We run build command and that folder will be created inside container
+dist
