@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.bootstrap = void 0;
+const core_1 = require("@nestjs/core");
+const app_module_1 = require("./app.module");
+const serverless_express_1 = require("@codegenie/serverless-express");
+async function bootstrap() {
+    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    await app.init();
+    const expressApp = app.getHttpAdapter().getInstance();
+    return (0, serverless_express_1.configure)({ app: expressApp });
+}
+exports.bootstrap = bootstrap;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFpbi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIm1haW4udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsdUNBQTJDO0FBRTNDLDZDQUF5QztBQUV6QyxzRUFBK0U7QUFFeEUsS0FBSyxVQUFVLFNBQVM7SUFDN0IsTUFBTSxHQUFHLEdBQUcsTUFBTSxrQkFBVyxDQUFDLE1BQU0sQ0FBQyxzQkFBUyxDQUFDLENBQUM7SUFFaEQsTUFBTSxHQUFHLENBQUMsSUFBSSxFQUFFLENBQUM7SUFFakIsTUFBTSxVQUFVLEdBQUcsR0FBRyxDQUFDLGNBQWMsRUFBRSxDQUFDLFdBQVcsRUFBRSxDQUFDO0lBQ3RELE9BQU8sSUFBQSw4QkFBaUIsRUFBQyxFQUFFLEdBQUcsRUFBRSxVQUFVLEVBQUUsQ0FBQyxDQUFDO0FBQ2hELENBQUM7QUFQRCw4QkFPQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IE5lc3RGYWN0b3J5IH0gZnJvbSAnQG5lc3Rqcy9jb3JlJztcclxuXHJcbmltcG9ydCB7IEFwcE1vZHVsZSB9IGZyb20gJy4vYXBwLm1vZHVsZSc7XHJcblxyXG5pbXBvcnQgeyBjb25maWd1cmUgYXMgc2VydmVybGVzc0V4cHJlc3MgfSBmcm9tICdAY29kZWdlbmllL3NlcnZlcmxlc3MtZXhwcmVzcyc7XHJcblxyXG5leHBvcnQgYXN5bmMgZnVuY3Rpb24gYm9vdHN0cmFwKCkge1xyXG4gIGNvbnN0IGFwcCA9IGF3YWl0IE5lc3RGYWN0b3J5LmNyZWF0ZShBcHBNb2R1bGUpO1xyXG5cclxuICBhd2FpdCBhcHAuaW5pdCgpO1xyXG5cclxuICBjb25zdCBleHByZXNzQXBwID0gYXBwLmdldEh0dHBBZGFwdGVyKCkuZ2V0SW5zdGFuY2UoKTtcclxuICByZXR1cm4gc2VydmVybGVzc0V4cHJlc3MoeyBhcHA6IGV4cHJlc3NBcHAgfSk7XHJcbn1cclxuXHJcblxyXG5cclxuIl19
