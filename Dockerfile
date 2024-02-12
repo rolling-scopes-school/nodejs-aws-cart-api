@@ -30,7 +30,7 @@ ENV PORT=8080
 
 EXPOSE 8080
 
-CMD ["node", "dist/main.js"]
+CMD ["pm2-runtime", "dist/main.js"]
 
 # # Use a smaller image as the base image
 # FROM node:12
