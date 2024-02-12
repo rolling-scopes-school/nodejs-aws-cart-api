@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Use a smaller image as the base image
-FROM node:latest-slim
+FROM node:latest
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
