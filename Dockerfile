@@ -1,5 +1,5 @@
 # Use the latest Node.js version as the base image
-FROM node:latest as build
+FROM node:12 as build
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Use a smaller image as the base image
-FROM node:latest
+FROM node:12
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
