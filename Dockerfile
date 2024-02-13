@@ -1,5 +1,5 @@
-# Use the latest Node.js version as the base image
-FROM node:12-alpine AS base
+# Use Node.js 18 version as the base image
+FROM node:18-alpine AS builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -17,18 +17,16 @@ COPY . .
 # Build the NestJS application
 RUN npm run build
 
-FROM node:12-alpine AS application
+FROM node:18-alpine 
 
-COPY --from=base /app/package*.json ./
+COPY --from=builder /app/package*.json ./
 RUN npm install --only=production
 RUN npm install pm2 -g
-COPY --from=base /app/dist ./dist
+COPY --from=builder /app/dist ./dist
 
 USER node
 
-ENV PORT=8080
-
-EXPOSE 8080
+EXPOSE 4000
 
 CMD ["pm2-runtime", "dist/main.js"]
 
