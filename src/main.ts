@@ -4,6 +4,11 @@ import { AppModule } from './app.module';
 
 import helmet from 'helmet';
 
+import { config } from 'dotenv';
+
+config();
+
+let port = process.env.PORT;
 
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,11 +19,11 @@ export async function bootstrap() {
 
   app.use(helmet());
 
-  await app.listen(4000);
+  await app.listen(port);
 }
 
 bootstrap().then(() => {
-  console.log('App is running on port 4000');
+  console.log(`App is running on port ${port}`);
 })
 
 
