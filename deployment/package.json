@@ -6,10 +6,11 @@
   },
   "scripts": {
     "build": "tsc",
-    "build:webpack": "webpack --config lib/webpack.config.js",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "deploy": "npm run synth && cdk deploy"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

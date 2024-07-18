@@ -1,11 +1,10 @@
 const webpack = require('webpack');
-const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 
 module.exports = {
-  entry: './src/main.ts',
+  entry: './src/lambda.ts',
   target: 'node',
-  externals: [nodeExternals()],
+  externals: [],
   module: {
     rules: [
       {
@@ -19,8 +18,9 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   output: {
-    path: path.resolve(__dirname, 'deployment/dist'),
-    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.js',
+    libraryTarget: 'commonjs2',
   },
   plugins: [
     new webpack.DefinePlugin({
