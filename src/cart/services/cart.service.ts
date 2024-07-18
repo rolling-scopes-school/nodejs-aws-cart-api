@@ -16,6 +16,7 @@ export class CartService {
     const id = v4();
     const userCart = {
       id,
+      user_id: userId,
       items: [],
     };
 
