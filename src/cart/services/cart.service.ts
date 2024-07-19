@@ -17,7 +17,7 @@ export class CartService {
     const userCart = {
       id,
       items: [],
-    };
+    } as Cart; // TODO: Fix this
 
     this.userCarts[ userId ] = userCart;
 
