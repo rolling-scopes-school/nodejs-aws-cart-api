@@ -21,7 +21,7 @@ export class CdkStack extends cdk.Stack {
         instanceIdentifier: process.env.DATABASE_NAME!,
         instanceEndpointAddress: process.env.DATABASE_HOST!,
         instanceResourceId: process.env.DATABASE_RESOURCE_ID!,
-        port: 5432,
+        port: +process.env.DATABASE_PORT!,
         securityGroups: securityGroupIds.map((id) =>
           ec2.SecurityGroup.fromSecurityGroupId(
             this,

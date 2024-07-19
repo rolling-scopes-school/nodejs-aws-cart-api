@@ -6,7 +6,7 @@ import {
   Body,
   Req,
   Post,
-  UseGuards,
+  // UseGuards,
   HttpStatus,
 } from '@nestjs/common';
 
@@ -26,32 +26,38 @@ export class CartController {
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
-  // @Get()
-  // findUserCart(@Req() req: AppRequest) {
-  //   const cart = this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
+  @Get()
+  findUserCart(@Req() req: AppRequest) {
+    const cart = this.cartService.findOrCreateByUserId(
+      getUserIdFromRequest(req),
+    );
 
-  //   return {
-  //     statusCode: HttpStatus.OK,
-  //     message: 'OK',
-  //     data: { cart, total: calculateCartTotal(cart) },
-  //   }
-  // }
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'OK',
+      data: { cart, total: calculateCartTotal(cart) },
+    };
+  }
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
-  // @Put()
-  // updateUserCart(@Req() req: AppRequest, @Body() body) { // TODO: validate body payload...
-  //   const cart = this.cartService.updateByUserId(getUserIdFromRequest(req), body)
+  @Put()
+  updateUserCart(@Req() req: AppRequest, @Body() body) {
+    // TODO: validate body payload...
+    const cart = this.cartService.updateByUserId(
+      getUserIdFromRequest(req),
+      body,
+    );
 
-  //   return {
-  //     statusCode: HttpStatus.OK,
-  //     message: 'OK',
-  //     data: {
-  //       cart,
-  //       total: calculateCartTotal(cart),
-  //     }
-  //   }
-  // }
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'OK',
+      data: {
+        cart,
+        total: calculateCartTotal(cart),
+      },
+    };
+  }
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
