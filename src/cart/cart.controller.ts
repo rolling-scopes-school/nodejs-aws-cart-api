@@ -5,23 +5,23 @@ import {
   Put,
   Body,
   Req,
-  Post,
+  // Post,
   // UseGuards,
   HttpStatus,
 } from '@nestjs/common';
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
-import { OrderService } from '../order';
+// import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 
-import { calculateCartTotal } from './models-rules';
+// import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 
 @Controller('api/profile/cart')
 export class CartController {
   constructor(
     private cartService: CartService,
-    private orderService: OrderService,
+    // private orderService: OrderService,
   ) {}
 
   // @UseGuards(JwtAuthGuard)
@@ -35,7 +35,10 @@ export class CartController {
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: { cart, total: calculateCartTotal(cart) },
+      data: {
+        cart,
+        // total: calculateCartTotal(cart)
+      },
     };
   }
 
@@ -54,7 +57,7 @@ export class CartController {
       message: 'OK',
       data: {
         cart,
-        total: calculateCartTotal(cart),
+        // total: calculateCartTotal(cart),
       },
     };
   }
@@ -73,36 +76,36 @@ export class CartController {
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
-  @Post('checkout')
-  checkout(@Req() req: AppRequest, @Body() body) {
-    const userId = getUserIdFromRequest(req);
-    const cart = this.cartService.findByUserId(userId);
+  // @Post('checkout')
+  // checkout(@Req() req: AppRequest, @Body() body) {
+  //   const userId = getUserIdFromRequest(req);
+  //   const cart = this.cartService.findByUserId(userId);
 
-    if (!(cart && cart.items.length)) {
-      const statusCode = HttpStatus.BAD_REQUEST;
-      req.statusCode = statusCode;
+  //   if (!(cart && cart.items.length)) {
+  //     const statusCode = HttpStatus.BAD_REQUEST;
+  //     req.statusCode = statusCode;
 
-      return {
-        statusCode,
-        message: 'Cart is empty',
-      };
-    }
+  //     return {
+  //       statusCode,
+  //       message: 'Cart is empty',
+  //     };
+  //   }
 
-    const { id: cartId, items } = cart;
-    const total = calculateCartTotal(cart);
-    const order = this.orderService.create({
-      ...body, // TODO: validate and pick only necessary data
-      userId,
-      cartId,
-      items,
-      total,
-    });
-    this.cartService.removeByUserId(userId);
+  //   const { id: cartId, items } = cart;
+  //   const total = calculateCartTotal(cart);
+  //   const order = this.orderService.create({
+  //     ...body, // TODO: validate and pick only necessary data
+  //     userId,
+  //     cartId,
+  //     items,
+  //     total,
+  //   });
+  //   this.cartService.removeByUserId(userId);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: { order },
-    };
-  }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: 'OK',
+  //     data: { order },
+  //   };
+  // }
 }

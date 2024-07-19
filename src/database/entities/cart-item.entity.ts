@@ -1,7 +1,7 @@
 import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'cart_items' })
-export class CartItem {
+export class CartItemEntity {
   @Column({ type: 'int' })
   count: number;
 

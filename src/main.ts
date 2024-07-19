@@ -4,7 +4,6 @@ import { AppModule } from './app.module';
 import { Callback, Context, Handler } from 'aws-lambda';
 import serverlessExpress from '@codegenie/serverless-express';
 
-// const port = process.env.PORT || 4000;
 let server: Handler;
 
 async function bootstrap(): Promise<Handler> {
@@ -14,8 +13,6 @@ async function bootstrap(): Promise<Handler> {
     origin: (req, callback) => callback(null, true),
   });
   app.use(helmet());
-
-  // await app.listen(port);
 
   await app.init();
   const expressApp = app.getHttpAdapter().getInstance();

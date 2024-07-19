@@ -1,9 +1,9 @@
 import { CartStatuses } from 'src/cart';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Order } from './order.entity';
+import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'carts' })
-export class Cart {
+export class CartEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -23,6 +23,6 @@ export class Cart {
   })
   status: CartStatuses;
 
-  @OneToMany(() => Order, (order) => order.cart)
-  orders: Order[];
+  @OneToMany(() => OrderEntity, (order) => order.cart)
+  orders: OrderEntity[];
 }

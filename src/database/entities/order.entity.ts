@@ -1,9 +1,9 @@
 import { CartStatuses } from 'src/cart';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Cart } from './cart.entity';
+import { CartEntity } from './cart.entity';
 
 @Entity({ name: 'orders' })
-export class Order {
+export class OrderEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -13,8 +13,8 @@ export class Order {
   @Column('uuid')
   cartId: string;
 
-  @ManyToOne(() => Cart)
-  cart: Cart;
+  @ManyToOne(() => CartEntity)
+  cart: CartEntity;
 
   @Column('simple-json')
   payment: {
