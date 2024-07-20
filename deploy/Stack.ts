@@ -2,6 +2,10 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 
 export class Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
@@ -14,7 +18,11 @@ export class Stack extends cdk.Stack {
       memorySize: 1024,
       runtime: lambda.Runtime.NODEJS_20_X,
       environment: {
-        RDS_CONNECTION_URL: '<UPDATED_ME>',
+        DB_HOST: process.env.DB_HOST as string,
+        DB_PORT: process.env.DB_PORT as string,
+        DB_USERNAME: process.env.DB_USERNAME as string,
+        DB_PASSWORD: process.env.DB_PASSWORD as string,
+        DB_NAME: process.env.DB_NAME as string,
       },
       bundling: {
         externalModules: [
@@ -29,7 +37,13 @@ export class Stack extends cdk.Stack {
     // exposes the lambda function via HTTP URL
     const { url } = server.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
-      cors: { allowedOrigins: ['*'] },
+      cors: { allowedOrigins: ['*'] ,
+              allowedMethods: [
+                lambda.HttpMethod.GET,
+                lambda.HttpMethod.DELETE,
+                lambda.HttpMethod.PUT,
+              ],
+              allowedHeaders: ['*'],}
     });
 
     new cdk.CfnOutput(this, 'Url', { value: url });

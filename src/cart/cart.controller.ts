@@ -1,46 +1,74 @@
-import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Delete,
+  Put,
+  Body,
+  Req,
+  Post,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 
-// import { BasicAuthGuard, JwtAuthGuard } from '../auth';
-import { OrderService } from '../order';
+import { OrderService } from '../order/services';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
+import { Cart } from './models';
+import { BasicAuthGuard } from 'src/auth';
 
 @Controller('api/profile/cart')
 export class CartController {
   constructor(
     private cartService: CartService,
-    private orderService: OrderService
-  ) { }
+    private orderService: OrderService,
+  ) {}
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Get()
-  findUserCart(@Req() req: AppRequest) {
-    const cart = this.cartService.findOrCreateByUserId(getUserIdFromRequest(req));
+  async findUserCart(@Req() req: AppRequest) {
+    const cart = await this.cartService.findOrCreateByUserId(
+      getUserIdFromRequest(req),
+    );
 
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
       data: { cart, total: calculateCartTotal(cart) },
-    }
+    };
   }
 
   // @UseGuards(JwtAuthGuard)
   // @UseGuards(BasicAuthGuard)
   @Put()
-  updateUserCart(@Req() req: AppRequest, @Body() body) { // TODO: validate body payload...
-    const cart = this.cartService.updateByUserId(getUserIdFromRequest(req), body)
+  async updateUserCart(@Req() req: AppRequest, @Body() body) {
+    // TODO: validate body payload...
+
+    let cart = null;
+    if (body.cartId) {
+      cart = await this.cartService.updateCartItemCount(
+        body.cartId,
+        body.productId,
+        body.count,
+      );
+    } else {
+      cart = await this.cartService.addProductToCart(
+        getUserIdFromRequest(req),
+        body.productId,
+        body.count,
+      );
+    }
 
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
       data: {
         cart,
-        total: calculateCartTotal(cart),
-      }
-    }
+        total: calculateCartTotal(cart as Cart),
+      },
+    };
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -52,41 +80,57 @@ export class CartController {
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-    }
+    };
   }
 
   // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Post('checkout')
-  checkout(@Req() req: AppRequest, @Body() body) {
+  async checkout(@Req() req: AppRequest, @Body() body) {
     const userId = getUserIdFromRequest(req);
-    const cart = this.cartService.findByUserId(userId);
+    const cart = await this.cartService.findByUserId(userId);
 
     if (!(cart && cart.items.length)) {
       const statusCode = HttpStatus.BAD_REQUEST;
-      req.statusCode = statusCode
+      req.statusCode = statusCode;
 
       return {
         statusCode,
         message: 'Cart is empty',
-      }
+      };
     }
 
-    const { id: cartId, items } = cart;
-    const total = calculateCartTotal(cart);
-    const order = this.orderService.create({
-      ...body, // TODO: validate and pick only necessary data
-      userId,
-      cartId,
-      items,
+    const { id: cartId } = cart;
+    const total = calculateCartTotal(cart as Cart);
+    const orderData = {
+      user_id: userId,
+      cart_id: cartId,
+      payment: {
+        type: 'CREDIT_CARD', // no data from the client side :'(
+        address: body.address.address,
+        creaditCard: '0000-0000-0000-0000', // no data from the client side :'(
+      },
+      delivery: {
+        address: body.address,
+      },
+      comments: body.address.comment,
+      status: 'OPEN',
+      statusHistory: [
+        {
+          status: 'OPEN',
+          timestamp: new Date(),
+          comment: 'Order has been created',
+        },
+      ],
       total,
-    });
-    this.cartService.removeByUserId(userId);
+    };
+
+    const order = await this.orderService.completeCheckout(orderData);
 
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
-      data: { order }
-    }
+      data: { order },
+    };
   }
 }

@@ -4,7 +4,7 @@ import * as express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
-import { configure } from '@codegenie/serverless-express';
+import { configure } from '@vendia/serverless-express';
 
 // Init app and set up serverless express once when lambda starts
 let memoizedServer: any;
@@ -29,6 +29,7 @@ async function bootstrap() {
 
 export const handler = async (event: any, context: any, callback: any) => {
   const server = await bootstrap();
+  // console.log(event)
   const result = await server(event, context, callback);
   return result;
 };

@@ -8,6 +8,7 @@ import { BasicStrategy, JwtStrategy, LocalStrategy } from './strategies';
 import { JWT_CONFIG } from '../constants';
 import { UsersModule } from '../users/users.module';
 
+
 const { secret, expiresIn } = JWT_CONFIG;
 
 @Module({
