@@ -1,0 +1,7 @@
+###
+
+GET https://9xxyy8znb3.execute-api.eu-north-1.amazonaws.com/prod/ HTTP/1.1
+Content-Type: application/json
+# x-api-key: TestApiKey
+
+###
