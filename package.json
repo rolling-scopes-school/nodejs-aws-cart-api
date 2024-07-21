@@ -8,7 +8,11 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "deploy": "cdk deploy",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed2": "node -r dotenv/config ./scripts/seed.js",
+    "deploy": "npm run build && cdk deploy",
     "format": "prettier --write src test deploy",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -29,11 +33,14 @@
     "@nestjs/jwt": "^10.1.0",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^10.0.3",
+    "@prisma/client": "^5.17.0",
+    "dotenv": "^16.4.5",
     "helmet": "^7.0.0",
     "passport": "^0.6.0",
     "passport-http": "^0.3.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "prisma": "^5.17.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.0"
@@ -53,6 +60,7 @@
     "@typescript-eslint/parser": "5.60.0",
     "aws-cdk-lib": "2.149.0",
     "cdk": "2.149.0",
+    "cross-env": "^7.0.3",
     "esbuild": "^0.23.0",
     "eslint": "8.43.0",
     "eslint-config-prettier": "^8.8.0",
@@ -80,5 +88,8 @@
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

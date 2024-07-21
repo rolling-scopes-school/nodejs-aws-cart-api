@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
+import { constants } from './constants';
 
 export class Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
@@ -14,7 +15,7 @@ export class Stack extends cdk.Stack {
       memorySize: 1024,
       runtime: lambda.Runtime.NODEJS_20_X,
       environment: {
-        RDS_CONNECTION_URL: '<UPDATED_ME>',
+        RDS_CONNECTION_URL: constants.RDS_CONNECTION_URL,
       },
       bundling: {
         externalModules: [

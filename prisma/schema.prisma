@@ -1,0 +1,120 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder", "relationJoins", "fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   id        String   @id
+//   login     String   @unique
+//   password  String
+//   version   Int
+//   createdAt DateTime
+//   updatedAt DateTime
+// }
+
+// model Album {
+//   id       String   @id
+//   name     String
+//   year     Int
+//   artistId String?
+//   Artist   Artist?  @relation(fields: [artistId], references: [id], onDelete SetNull)
+//   favorite Boolean? @default(false)
+//   Track    Track[]
+// }
+
+// model Artist {
+//   id       String   @id
+//   name     String
+//   grammy   Boolean
+//   favorite Boolean? @default(false)
+//   // favorites Favorites? @relation(fields: [favoritesId], references: [id], onDelete: Cascade) - if favorite in separate entity
+//   Album    Album[]
+//   Track    Track[]
+// }
+
+// model Track {
+//   id       String   @id
+//   name     String
+//   artistId String?
+//   Artist   Artist?  @relation(fields: [artistId], references: [id], onDelete SetNull)
+//   albumId  String?
+//   Album    Album?   @relation(fields: [albumId], references: [id], onDelete SetNull)
+//   duration Int
+//   favorite Boolean? @default(false)
+// }
+
+// model Favorites {
+//   id String @id @default(uuid())
+//   artists Artist[]
+//   tracks Track[]
+//   albums Album[]
+// }
+
+// enum InvoiceStatus {
+//   PENDING
+//   PAID
+// }
+
+// model User {
+//   id       String @id @default(uuid())
+//   name     String
+//   email    String
+//   password String
+// }
+
+// model Customer {
+//   id        String    @id @default(uuid())
+//   name      String
+//   email     String    @unique
+//   image_url String
+//   invoices  Invoice[]
+// }
+
+// model Invoice {
+//   id          String        @id @default(uuid())
+//   customer_id String
+//   amount      Int
+//   date        String
+//   status      InvoiceStatus @default(PENDING)
+//   Customer    Customer      @relation(fields: [customer_id], references: [id])
+// }
+
+// model Revenue {
+//   month   String @id @default(uuid())
+//   revenue Int
+// }
+
+enum CartStatuses {
+  OPEN
+  ORDERED
+}
+
+model Cart {
+  id         String       @id @default(uuid())
+  user_id    String
+  // User   User?  @relation(fields: [user_id], references: [id], onDelete SetNull)
+  created_at DateTime     @default(now())
+  updated_at DateTime     @default(now())
+  status     CartStatuses @default(OPEN)
+}
+
+model CartItem {
+  cart_id    String @id @default(uuid())
+  product_id String
+  count      Int
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String @unique
+  password String
+
+  // @@map("users")
+  // carts Cart[]
+  // orders Order[]
+}
