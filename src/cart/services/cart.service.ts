@@ -17,12 +17,14 @@ export class CartService {
   ) {}
 
   async findByUserId(userId: string) {
-    return this.cartRepo.findOneBy({ userId });
+    return await this.cartRepo.findOneBy({ userId });
   }
 
   async createByUserId(userId: string) {
+    console.log('userId from createUser', userId);
     try {
       const id = v4();
+      console.log('newId', id);
 
       const newCart = this.cartRepo.create({
         id,
@@ -31,7 +33,7 @@ export class CartService {
         updatedAt: new Date().toISOString(),
         status: CartStatuses.OPEN,
       });
-
+      console.log('newCart from createUser', newCart);
       const userCart = await this.cartRepo.save(newCart);
 
       return userCart;
@@ -41,11 +43,15 @@ export class CartService {
   }
 
   async findOrCreateByUserId(userId: string) {
-    const userCart = this.cartRepo.findOneBy({ userId });
+    console.log('userId', userId);
+    const userCart = await this.cartRepo.findOneBy({ userId });
     if (userCart) {
+      console.log('existedUserCartId', userCart.id);
       return userCart;
     }
-    return this.createByUserId(userId);
+    const newUserCart = await this.createByUserId(userId);
+    console.log('newUserCartId', newUserCart.id);
+    return newUserCart;
   }
 
   async updateByUserId(
@@ -78,6 +84,7 @@ export class CartService {
   }
 
   async removeByUserId(userId: string) {
+    console.log('userIdToRemove', userId);
     try {
       const userCart = await this.findByUserId(userId);
       if (!userCart) {

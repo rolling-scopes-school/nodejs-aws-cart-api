@@ -6,32 +6,36 @@ import {
   Body,
   Req,
   // Post,
-  // UseGuards,
+  UseGuards,
   HttpStatus,
 } from '@nestjs/common';
 
-// import { BasicAuthGuard, JwtAuthGuard } from '../auth';
+import { BasicAuthGuard, JwtAuthGuard } from '../auth';
 // import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 
 // import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 
-@Controller('api/profile/cart')
+@Controller('cart')
 export class CartController {
   constructor(
-    private cartService: CartService,
-    // private orderService: OrderService,
+    private cartService: CartService, // private orderService: OrderService,
   ) {}
 
   // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Get()
-  findUserCart(@Req() req: AppRequest) {
-    const cart = this.cartService.findOrCreateByUserId(
+  async findUserCart(@Req() req: AppRequest) {
+    const userReq = getUserIdFromRequest(req);
+    console.log('userReq', userReq);
+    const cart = await this.cartService.findOrCreateByUserId(
       getUserIdFromRequest(req),
     );
-
+    // const cart = await this.cartService.findOrCreateByUserId(
+    //   '31017812-0236-4c2d-b4fb-82f029ad7d6e',
+    // );
+    console.log('returnedCart', cart);
     return {
       statusCode: HttpStatus.OK,
       message: 'OK',
@@ -63,10 +67,10 @@ export class CartController {
   }
 
   // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  @UseGuards(BasicAuthGuard)
   @Delete()
-  clearUserCart(@Req() req: AppRequest) {
-    this.cartService.removeByUserId(getUserIdFromRequest(req));
+  async clearUserCart(@Req() req: AppRequest) {
+    await this.cartService.removeByUserId(getUserIdFromRequest(req));
 
     return {
       statusCode: HttpStatus.OK,

@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
@@ -21,7 +22,7 @@ export class CdkStack extends cdk.Stack {
         instanceIdentifier: process.env.DATABASE_NAME!,
         instanceEndpointAddress: process.env.DATABASE_HOST!,
         instanceResourceId: process.env.DATABASE_RESOURCE_ID!,
-        port: +process.env.DATABASE_PORT!,
+        port: 5432,
         securityGroups: securityGroupIds.map((id) =>
           ec2.SecurityGroup.fromSecurityGroupId(
             this,
@@ -46,5 +47,32 @@ export class CdkStack extends cdk.Stack {
     });
 
     cartDB.grantConnect(nestJSFunction, process.env.DATABASE_USERNAME!);
+
+    const api = new apigateway.RestApi(this, 'cart-api', {
+      restApiName: 'Cart Service',
+      cloudWatchRole: true,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+      },
+    });
+
+    const cartResource = api.root.addResource('cart');
+    const nestJSLambdaIntegration = new apigateway.LambdaIntegration(
+      nestJSFunction,
+    );
+    cartResource.addMethod('GET', nestJSLambdaIntegration);
+    cartResource.addMethod('PUT', nestJSLambdaIntegration);
+    cartResource.addMethod('DELETE', nestJSLambdaIntegration);
+
+    const deployment = new apigateway.Deployment(this, 'Deployment', { api });
+
+    const devStage = new apigateway.Stage(this, 'dev-stage', {
+      stageName: 'dev',
+      deployment,
+    });
+
+    api.deploymentStage = devStage;
   }
 }

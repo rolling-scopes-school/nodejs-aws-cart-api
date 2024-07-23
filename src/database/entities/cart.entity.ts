@@ -1,6 +1,14 @@
 import { CartStatuses } from 'src/cart';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { OrderEntity } from './order.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { CartItemEntity } from './cart-item.entity';
+// import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'carts' })
 export class CartEntity {
@@ -10,10 +18,10 @@ export class CartEntity {
   @Column('uuid')
   userId: string;
 
-  @Column({ type: 'date' })
+  @CreateDateColumn()
   createdAt: string;
 
-  @Column({ type: 'date' })
+  @UpdateDateColumn()
   updatedAt: string;
 
   @Column({
@@ -23,6 +31,8 @@ export class CartEntity {
   })
   status: CartStatuses;
 
-  @OneToMany(() => OrderEntity, (order) => order.cart)
-  orders: OrderEntity[];
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart)
+  items: CartItemEntity[];
+  //   @OneToMany(() => OrderEntity, (order) => order.cart)
+  //   orders: OrderEntity[];
 }
