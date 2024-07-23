@@ -92,6 +92,7 @@ export class CartService {
         throw new Error(`Cart of user ${userId} not found.`);
       } else {
         await this.cartRepo.delete({ userId });
+        console.log(`Cart ${userCart.id} was deleted`);
       }
     } catch (error) {
       console.log(error);
