@@ -4,6 +4,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { CartEntity } from './entities/cart.entity';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { OrderEntity } from './entities/order.entity';
 
 @Module({
   imports: [
@@ -20,14 +21,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           username: configService.get<string>('DB_USER'),
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_NAME'),
-          entities: [CartEntity, CartItemEntity],
+          entities: [CartEntity, CartItemEntity, OrderEntity],
           synchronize: true,
           logging: true,
           namingStrategy: new SnakeNamingStrategy(),
         };
       },
     }),
-    TypeOrmModule.forFeature([CartEntity, CartItemEntity]),
+    TypeOrmModule.forFeature([CartEntity, CartItemEntity, OrderEntity]),
   ],
   exports: [TypeOrmModule],
 })

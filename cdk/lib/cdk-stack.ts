@@ -65,6 +65,7 @@ export class CdkStack extends cdk.Stack {
     cartResource.addMethod('GET', nestJSLambdaIntegration);
     cartResource.addMethod('PUT', nestJSLambdaIntegration);
     cartResource.addMethod('DELETE', nestJSLambdaIntegration);
+    cartResource.addMethod('POST', nestJSLambdaIntegration);
 
     const deployment = new apigateway.Deployment(this, 'Deployment', { api });
 

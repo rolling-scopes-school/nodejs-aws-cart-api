@@ -21,11 +21,14 @@ export class CartService {
     return await this.cartRepo.findOneBy({ userId });
   }
 
+  async findItemsByCartId(cartId: string) {
+    return await this.cartItemRepo.findBy({ cartId });
+  }
+
   async createByUserId(userId: string) {
     console.log('userId from createUser', userId);
     try {
       const id = v4();
-      console.log('newId', id);
 
       const newCart = this.cartRepo.create({
         id,

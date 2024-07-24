@@ -1,5 +1,11 @@
 import { CartStatuses } from 'src/cart';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { CartEntity } from './cart.entity';
 
 @Entity({ name: 'orders' })
@@ -13,20 +19,15 @@ export class OrderEntity {
   @Column('uuid')
   cartId: string;
 
-  @ManyToOne(() => CartEntity)
-  cart: CartEntity;
-
   @Column('simple-json')
   payment: {
     type: string;
-    address?: any;
-    creditCard?: any;
   };
 
   @Column('simple-json')
   delivery: {
     type: string;
-    address: any;
+    address: string;
   };
 
   @Column('text', { nullable: true })
@@ -41,4 +42,8 @@ export class OrderEntity {
 
   @Column('int')
   total: number;
+
+  @ManyToOne(() => CartEntity, (cart) => cart.orders)
+  @JoinColumn({ name: 'cart_id', referencedColumnName: 'id' })
+  cart: CartEntity;
 }
