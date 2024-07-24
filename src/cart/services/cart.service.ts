@@ -56,9 +56,7 @@ export class CartService {
   }
 
   async updateByUserId(userId: string, updateCartDto: UpdateCartDto) {
-    console.log('updateCartDto from service', updateCartDto);
     const { items } = updateCartDto;
-    console.log('items', items);
     try {
       const userCart = await this.findOrCreateByUserId(userId);
       if (!userCart) {
