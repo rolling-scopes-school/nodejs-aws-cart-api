@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CartEntity } from 'src/database/entities/cart.entity';
 import { Repository } from 'typeorm';
 import { CartItemEntity } from 'src/database/entities/cart-item.entity';
+import { UpdateCartDto } from '../dto/update-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -54,26 +55,25 @@ export class CartService {
     return newUserCart;
   }
 
-  async updateByUserId(
-    userId: string,
-    items: { productId: string; count: number }[],
-  ) {
+  async updateByUserId(userId: string, updateCartDto: UpdateCartDto) {
+    console.log('updateCartDto from service', updateCartDto);
+    const { items } = updateCartDto;
+    console.log('items', items);
     try {
       const userCart = await this.findOrCreateByUserId(userId);
       if (!userCart) {
-        console.log(`Cart of user ${userId} not found.`);
-        throw new Error(`Cart of user ${userId} not found.`);
+        throw new Error(`Cart of ${userId} was not found and was not created.`);
       }
-      await this.cartItemRepo.delete({ cartId: userCart.id });
 
-      const newCartItems = items.map((item) =>
-        this.cartItemRepo.create({
+      for (const item of items) {
+        const newCartItem = this.cartItemRepo.create({
           cartId: userCart.id,
           productId: item.productId,
           count: item.count,
-        }),
-      );
-      await this.cartItemRepo.save(newCartItems);
+        });
+        await this.cartItemRepo.save(newCartItem);
+      }
+
       userCart.updatedAt = new Date().toISOString();
 
       await this.cartRepo.save(userCart);
@@ -84,7 +84,7 @@ export class CartService {
   }
 
   async removeByUserId(userId: string) {
-    console.log('userIdToRemove', userId);
+    console.log('userIdToCartRemove', userId);
     try {
       const userCart = await this.findByUserId(userId);
       if (!userCart) {

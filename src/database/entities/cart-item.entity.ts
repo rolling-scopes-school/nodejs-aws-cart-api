@@ -12,7 +12,12 @@ export class CartItemEntity {
   @Column({ type: 'int' })
   count: number;
 
-  @ManyToOne(() => CartEntity, (cart) => cart.items)
-  @JoinColumn({ name: 'cartId', referencedColumnName: 'id' })
+  @ManyToOne(() => CartEntity, (cart) => cart.items, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    nullable: false,
+    orphanedRowAction: 'delete',
+  })
+  @JoinColumn({ name: 'cart_id', referencedColumnName: 'id' })
   cart: CartEntity;
 }
