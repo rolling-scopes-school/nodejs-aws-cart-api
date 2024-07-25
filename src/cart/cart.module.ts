@@ -7,8 +7,9 @@ import { CartService } from './services';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [OrderModule, forwardRef(() => DatabaseModule)],
+  imports: [forwardRef(() => DatabaseModule), forwardRef(() => OrderModule)],
   providers: [CartService],
   controllers: [CartController],
+  exports: [CartService],
 })
 export class CartModule {}

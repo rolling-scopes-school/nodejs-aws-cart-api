@@ -5,7 +5,6 @@ import {
   Put,
   Body,
   Req,
-  // Post,
   UseGuards,
   HttpStatus,
   ValidationPipe,
@@ -39,9 +38,6 @@ export class CartController {
       const cart = await this.cartService.findOrCreateByUserId(
         getUserIdFromRequest(req),
       );
-      // const cart = await this.cartService.findOrCreateByUserId(
-      //   '31017812-0236-4c2d-b4fb-82f029ad7d6e',
-      // );
       console.log('returnedCart', cart);
       return {
         statusCode: HttpStatus.OK,
@@ -101,8 +97,7 @@ export class CartController {
 
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
-  // @Post('checkout')
-  @Post()
+  @Post('checkout')
   async checkout(
     @Req() req: AppRequest,
     @Body(new ValidationPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }))
@@ -115,7 +110,6 @@ export class CartController {
       const cartItems = await this.cartService.findItemsByCartId(cart.id);
       console.log('cartId', cart.id);
       console.log('cartItems', cartItems);
-      // if (!(cart && cart.items.length)) {
       if (!(cart && cartItems.length)) {
         const statusCode = HttpStatus.BAD_REQUEST;
         req.statusCode = statusCode;
@@ -124,21 +118,21 @@ export class CartController {
           message: 'Cart is empty',
         };
       }
-      const { id: cartId, items } = cart;
+      const { id: cartId } = cart;
       // const total = calculateCartTotal(cart);
+
       const order = await this.orderService.create({
         ...checkoutDto,
         userId,
         cartId,
-        // items,
         status: CartStatuses.ORDERED,
-        total: 5,
+        total: cartItems.length,
       });
-      // this.cartService.removeByUserId(userId);
+
       return {
         statusCode: HttpStatus.OK,
         message: 'OK',
-        data: { order, items: cartItems },
+        data: { order },
       };
     } catch (error) {
       console.log(error);
