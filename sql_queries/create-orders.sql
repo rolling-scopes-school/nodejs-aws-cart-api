@@ -1,3 +1,13 @@
-insert into orders (id, user_id, cart_id, payment, delivery, comments, status, total) values 
-	( uuid_generate_v4(), '382cb243-1530-453f-9177-96c1bed60f8d', '6bd594cf-5acc-48e6-9340-0cf7ed711263', '{"type": "paypal"}', '{"type": "dhl", "address": "test address"}', 'test comment', 'OPEN', 25)
-   
+
+create table orders (
+	id uuid primary key default uuid_generate_v4(),
+   	user_id uuid not null,
+   	cart_id uuid not null,
+   	foreign key ("cart_id") references "carts" ("id"),
+	foreign key ("user_id") references "users" ("id"),
+   	payment json not null,
+   	delivery json not null,
+   	comments text,
+   	status status_type,
+   	total integer not null
+)

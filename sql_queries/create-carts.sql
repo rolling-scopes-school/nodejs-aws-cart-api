@@ -1,6 +1,7 @@
 create table carts (
     id uuid primary key default uuid_generate_v4(),
     user_id uuid not null,
+    foreign key ("user_id") references "users" ("id"),
     created_at date not null,
     updated_at date not null,
     status status_type 

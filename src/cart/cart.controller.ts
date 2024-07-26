@@ -38,15 +38,20 @@ export class CartController {
       const cart = await this.cartService.findOrCreateByUserId(
         getUserIdFromRequest(req),
       );
-      console.log('returnedCart', cart);
-      return {
+      const cartItems = await this.cartService.findItemsByCartId(cart.id);
+      console.log('cartItems', cartItems);
+      console.log('cart', cart);
+      const result = {
         statusCode: HttpStatus.OK,
         message: 'OK',
         data: {
-          cart,
+          ...cart,
+          items: cartItems,
           // total: calculateCartTotal(cart)
         },
       };
+      console.log('cartResult', result);
+      return result;
     } catch (error) {
       console.log(error);
     }
@@ -60,6 +65,7 @@ export class CartController {
     @Body(new ValidationPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }))
     updateCartDto: UpdateCartDto,
   ) {
+    console.log('updateCartDto', updateCartDto);
     try {
       const cart = await this.cartService.updateByUserId(
         getUserIdFromRequest(req),
