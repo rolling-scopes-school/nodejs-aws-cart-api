@@ -4,6 +4,11 @@ import * as request from 'supertest';
 import { CartModule } from '../src/cart/cart.module';
 import { CartService } from 'src/cart';
 import { CartRepository } from 'src/cart/services/cart.repository';
+import { DatabaseModule } from 'src/database/pg/database.module';
+import { ConfigModule } from '@nestjs/config';
+import { BasicStrategy } from 'src/auth/strategies';
+import { AuthModule } from 'src/auth/auth.module';
+import { UsersModule } from 'src/users/users.module';
 
 const mockProduct = {
   product: {
@@ -23,8 +28,16 @@ describe('CartController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      providers: [CartService, CartRepository],
-      imports: [CartModule],
+      providers: [CartService, CartRepository, BasicStrategy],
+      imports: [
+        AuthModule,
+        UsersModule,
+        CartModule,
+        DatabaseModule,
+        ConfigModule.forRoot({
+          isGlobal: true,
+        }),
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -32,13 +45,13 @@ describe('CartController (e2e)', () => {
   });
 
   it('/api/profile/cart GET', () => {
-    return request(app.getHttpServer()).get('/api/profile/cart').expect(200);
+    return request(app.getHttpServer()).get('/api/profile/cart').expect(401);
   });
 
-  it('/api/profile/cart PUT', () => {
+  it('/api/profile/cart PUG', () => {
     return request(app.getHttpServer())
       .put('/api/profile/cart')
       .send(mockProduct)
-      .expect(200);
+      .expect(401);
   });
 });

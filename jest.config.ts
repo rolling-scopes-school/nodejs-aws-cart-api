@@ -1,8 +1,6 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+import { pathsToModuleNameMapper, JestConfigWithTsJest } from 'ts-jest';
 
-import { pathsToModuleNameMapper } from 'ts-jest';
-
-const jestConfig = {
+const jestConfig: JestConfigWithTsJest = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
   testRegex: '.spec.ts$',
