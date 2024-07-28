@@ -78,7 +78,8 @@ export class CartController {
       address: body.address,
       total,
     });
-    await this.cartService.removeByUserId(userId);
+
+    await this.cartService.updateCartStatus(userId);
 
     return {
       order,

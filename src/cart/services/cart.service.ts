@@ -61,6 +61,10 @@ export class CartService {
     return userCart;
   }
 
+  updateCartStatus(userId: string): Promise<void> {
+    return this.cartRepository.updateCartStatus(userId);
+  }
+
   removeByUserId(userId: string): Promise<void> {
     return this.cartRepository.removeCart(userId);
   }

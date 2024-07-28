@@ -3,6 +3,7 @@ import { Knex } from 'knex';
 import {
   Cart,
   CartItem,
+  CartStatuses,
   DynamoDBTable,
   FindCartByIdPGRes,
   PreCart,
@@ -34,12 +35,13 @@ export class CartRepository {
         `${PGTable.cartItems}.count`,
       )
       .from(PGTable.carts)
-      .innerJoin(
+      .leftJoin(
         PGTable.cartItems,
         `${PGTable.carts}.id`,
         `${PGTable.cartItems}.cart_id`,
       )
-      .where(`${PGTable.carts}.user_id`, userId);
+      .where(`${PGTable.carts}.user_id`, userId)
+      .andWhere(`${PGTable.carts}.status`, CartStatuses.OPEN);
 
     if (res.length === 0) {
       return undefined;
@@ -60,22 +62,29 @@ export class CartRepository {
       };
     }, {} as Partial<PreCart>);
 
-    const productIds = preCart.items.map(({ product_id: id }) => ({ id }));
+    if (preCart.items.length) {
+      const productIds = preCart.items.map(({ product_id: id }) => ({ id }));
 
-    const RequestItems = { [DynamoDBTable.product]: { Keys: productIds } };
-    const result = await ddbDocClient(this.configService).send(
-      new BatchGetCommand({ RequestItems }),
-    );
+      const RequestItems = { [DynamoDBTable.product]: { Keys: productIds } };
+      const result = await ddbDocClient(this.configService).send(
+        new BatchGetCommand({ RequestItems }),
+      );
 
-    const items: CartItem[] = result.Responses.product.map((item) => ({
-      product: item as CartItem['product'],
-      count:
-        preCart.items.find(({ product_id: id }) => id === item.id).count || 0,
-    }));
-    const cart = preCart as unknown as Cart;
-    cart.items = items;
+      const items: CartItem[] = result.Responses.product.map((item) => ({
+        product: item as CartItem['product'],
+        count:
+          preCart.items.find(({ product_id: id }) => id === item.id).count || 0,
+      }));
+      const cart = preCart as unknown as Cart;
+      cart.items = items;
 
-    return cart;
+      return cart;
+    }
+
+    return {
+      ...preCart,
+      items: [],
+    } as Cart;
   }
 
   create(cart: Cart) {
@@ -123,7 +132,17 @@ export class CartRepository {
       .andWhere('product_id', payload.product.id);
   }
 
+  async updateCartStatus(userId: string) {
+    await this.knex(PGTable.carts)
+      .update({ status: CartStatuses.ORDERED })
+      .where('user_id', userId)
+      .andWhere('status', CartStatuses.OPEN);
+  }
+
   async removeCart(userId: string) {
-    await this.knex(PGTable.carts).delete().where('user_id', userId);
+    await this.knex(PGTable.carts)
+      .delete()
+      .where('user_id', userId)
+      .andWhere('status', CartStatuses.OPEN);
   }
 }
