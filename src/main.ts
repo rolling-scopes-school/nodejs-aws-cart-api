@@ -1,24 +1,36 @@
 import { NestFactory } from '@nestjs/core';
 
-import helmet from 'helmet';
+// import helmet from 'helmet';
 
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
+import { APIGatewayProxyEvent, Handler, Context, Callback } from 'aws-lambda';
+import { configure } from '@codegenie/serverless-express';
 
-async function bootstrap() {
+let server: Handler;
+
+async function bootstrap(): Promise<Handler> {
   const app = await NestFactory.create(AppModule);
 
-  const configService = app.get(ConfigService);
+  await app.init();
 
-  const port = configService.get('APP_PORT');
+  const expressApp = app.getHttpAdapter().getInstance();
 
-  app.enableCors({
-    origin: (req, callback) => callback(null, true),
-  });
-  app.use(helmet());
-
-  await app.listen(port, () => {
-    console.log('App is running on %s port', port);
-  });
+  return configure({ app: expressApp });
 }
-bootstrap();
+
+export const handler: Handler = async (
+  event: APIGatewayProxyEvent,
+  context: Context,
+  callback: Callback,
+) => {
+  server = server ?? (await bootstrap());
+  const res = await server(event, context, callback);
+
+  return {
+    statusCode: res.statusCode,
+    body: JSON.stringify({
+      res,
+      event,
+    }),
+  };
+};

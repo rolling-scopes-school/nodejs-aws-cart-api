@@ -16,6 +16,7 @@ import {
 } from './auth';
 import { User } from './users';
 import { AppRequest } from './shared';
+import { LambdaFunctionURLResult } from 'aws-lambda';
 
 @Controller()
 export class AppController {
@@ -32,8 +33,10 @@ export class AppController {
   @Post('api/auth/register')
   @HttpCode(HttpStatus.CREATED)
   // TODO ADD validation
-  register(@Body() body: User) {
-    return this.authService.register(body);
+  async register(@Body() body: User): Promise<LambdaFunctionURLResult> {
+    const res = await this.authService.register(body);
+
+    return JSON.stringify(res);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -41,14 +44,14 @@ export class AppController {
   async login(@Request() req: AppRequest) {
     const token = this.authService.login(req.user, 'basic');
 
-    return token;
+    return JSON.stringify(token);
   }
 
   @UseGuards(BasicAuthGuard)
   @Get('api/profile')
   async getProfile(@Request() req: AppRequest) {
-    return {
+    return JSON.stringify({
       user: req.user,
-    };
+    });
   }
 }

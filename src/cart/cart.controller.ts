@@ -15,7 +15,6 @@ import { Order, OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
-import { CartItem } from './models';
 import { CreateOrderDto, PutCartPayload } from 'src/order/type';
 
 @Controller('api/profile/cart')
@@ -28,12 +27,12 @@ export class CartController {
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
   @Get()
-  async findUserCart(@Req() req: AppRequest): Promise<CartItem[]> {
+  async findUserCart(@Req() req: AppRequest) {
     const cart = await this.cartService.findOrCreateByUserId(
       getUserIdFromRequest(req),
     );
 
-    return cart.items;
+    return JSON.stringify(cart.items);
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -51,8 +50,8 @@ export class CartController {
   @UseGuards(BasicAuthGuard)
   @Delete()
   @HttpCode(HttpStatus.OK)
-  clearUserCart(@Req() req: AppRequest) {
-    this.cartService.removeByUserId(getUserIdFromRequest(req));
+  async clearUserCart(@Req() req: AppRequest) {
+    await this.cartService.removeByUserId(getUserIdFromRequest(req));
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -81,9 +80,7 @@ export class CartController {
 
     await this.cartService.updateCartStatus(userId);
 
-    return {
-      order,
-    };
+    return JSON.stringify({ order });
   }
 
   @UseGuards(BasicAuthGuard)

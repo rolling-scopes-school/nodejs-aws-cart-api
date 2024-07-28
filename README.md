@@ -6,6 +6,14 @@ npm i
 ```
 
 ## Running the app
+npm i && (cd cdk && npm i)
+```
+
+## build and deploy
+```bash
+npm run build && (cd cdk && cdk synth && cdk deploy)
+```
+
 create .env file and put there vars from env.example file. Replace values as needed
 
 Run postgres in docker container with command
@@ -71,4 +79,5 @@ key `--runInBand` is needed to avoid deadlocks in transactions
 ```bash
 npm run test:e2e
 ```
+
 

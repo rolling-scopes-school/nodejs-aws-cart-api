@@ -39,3 +39,6 @@ lerna-debug.log*
 
 .env
 cdk/node_modules
+.aws-sam
+req.sh
+run.sh
