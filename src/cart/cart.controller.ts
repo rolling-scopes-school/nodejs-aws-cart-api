@@ -88,7 +88,7 @@ export class CartController {
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  getOrder(): Order[] {
+  getOrder(): Promise<Order[]> {
     return this.orderService.getAll();
   }
 

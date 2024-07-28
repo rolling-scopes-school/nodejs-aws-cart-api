@@ -1,21 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Order } from '../models';
 import { CreateOrderPayload, OrderStatus } from '../type';
+import { PG_CONNECTION } from 'src/database/pg/database.module';
+import { OrderRepository } from './order.repository';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {};
+  constructor(
+    @Inject(PG_CONNECTION) private readonly orderRepository: OrderRepository,
+  ) {}
 
-  getAll() {
-    return Object.values(this.orders);
+  getAll(): Promise<Order[]> {
+    return this.orderRepository.getAll();
   }
 
-  findById(orderId: string): Order {
-    return this.orders[orderId];
+  findById(orderId: string): Promise<Order> {
+    return this.orderRepository.getById(orderId);
   }
 
-  create(data: CreateOrderPayload) {
+  async create(data: CreateOrderPayload) {
     const id = randomUUID() as string;
     const order: Order = {
       id,
@@ -29,22 +33,21 @@ export class OrderService {
       ],
     };
 
-    this.orders[id] = order;
-
-    return order;
+    await this.orderRepository.create(order);
   }
 
   // TODO add  type
-  update(orderId: string, data) {
-    const order = this.findById(orderId);
+  //TODO IMPLEMENT
+  // update(orderId: string, data) {
+  //   const order = this.findById(orderId);
 
-    if (!order) {
-      throw new Error('Order does not exist.');
-    }
+  //   if (!order) {
+  //     throw new Error('Order does not exist.');
+  //   }
 
-    this.orders[orderId] = {
-      ...data,
-      id: orderId,
-    };
-  }
+  //   this.orders[orderId] = {
+  //     ...data,
+  //     id: orderId,
+  //   };
+  // }
 }

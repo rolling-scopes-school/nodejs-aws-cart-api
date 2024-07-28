@@ -39,6 +39,36 @@ export class OrderRepository {
       .then(getHydrateAll(hydrateGetOrderResult));
   }
 
+  async getById(orderId: string) {
+    return this.knex
+      .select([
+        `${PGTable.orders}.id`,
+        `${PGTable.orders}.user_id as userId`,
+        `${PGTable.orders}.cart_id as cartId`,
+        `${PGTable.orders}.delivery`,
+        `${PGTable.orders}.comment`,
+        `${PGTable.orderItems}.product_id as productId`,
+        `${PGTable.orderItems}.count`,
+        `${PGTable.orderStatuses}.id as statusId`,
+        `${PGTable.orderStatuses}.status`,
+        `${PGTable.orderStatuses}.timestamp`,
+        `${PGTable.orderStatuses}.comment`,
+      ])
+      .from(PGTable.orders)
+      .innerJoin(
+        PGTable.orderItems,
+        `${PGTable.orders}.id`,
+        `${PGTable.orderItems}.order_id`,
+      )
+      .innerJoin(
+        PGTable.orderStatuses,
+        `${PGTable.orders}.id`,
+        `${PGTable.orderStatuses}.order_id`,
+      )
+      .where(`${PGTable.orders}.id`, orderId)
+      .then(hydrateGetOrderResult);
+  }
+
   async create(payload: Order) {
     await this.knex.transaction(async (trx) => {
       await trx(PGTable.orders).insert({
