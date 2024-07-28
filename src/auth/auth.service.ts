@@ -25,7 +25,6 @@ export class AuthService {
     const newUser = await this.usersService.createOne(payload);
 
     return { userId: newUser.id };
-    // return this.login(newUser, 'basic');
   }
 
   async validateUser(name: string, password: string): Promise<User> {

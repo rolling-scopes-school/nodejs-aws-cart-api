@@ -23,9 +23,6 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.js'],
-    // alias: {
-    //   '@nestjs': path.resolve(__dirname, 'node_modules', '@nestjs'),
-    // },
     plugins: [
       new TsconfigPathsPlugin({
         configFile: tsConfigFile,
@@ -59,7 +56,6 @@ module.exports = {
     mariasql: 'mariasql',
     'better-sqlite3': 'better-sqlite3',
     sqlite3: 'sqlite3',
-    // 'aws-sdk': 'aws-sdk',
     'mock-aws-s3': 'mock-aws-s3',
     tedious: 'tedious',
     nock: 'nock',
