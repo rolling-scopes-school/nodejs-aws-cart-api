@@ -10,7 +10,7 @@ import { getHydrateAll } from './get-hydreated-all.util';
 export class OrderRepository {
   constructor(@Inject(PG_CONNECTION) private readonly knex: Knex<any>) {}
 
-  async getAll() {
+  getAll() {
     return this.knex
       .select([
         `${PGTable.orders}.id`,

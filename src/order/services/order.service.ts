@@ -1,15 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Order } from '../models';
 import { CreateOrderPayload, OrderStatus } from '../type';
-import { PG_CONNECTION } from 'src/database/pg/database.module';
 import { OrderRepository } from './order.repository';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    @Inject(PG_CONNECTION) private readonly orderRepository: OrderRepository,
-  ) {}
+  constructor(private readonly orderRepository: OrderRepository) {}
 
   getAll(): Promise<Order[]> {
     return this.orderRepository.getAll();
