@@ -1,3 +1,5 @@
+# Multistage builds:
+    
 # Base node image
 FROM node:20-alpine AS base
 WORKDIR /app
@@ -7,7 +9,7 @@ FROM base AS dependencies
 COPY package*.json ./
 RUN npm install && npm cache clean --force
 
-# Copy files/build
+# Copy files and build
 FROM dependencies AS build
 WORKDIR /app
 COPY . .
