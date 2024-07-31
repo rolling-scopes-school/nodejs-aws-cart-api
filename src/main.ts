@@ -19,7 +19,5 @@ export const handler: Handler = async (
   callback: Callback,
 ) => {
   server = server ?? (await bootstrap());
-  const res = await server(event, context, callback);
-
-  return { ...res, body: JSON.stringify(res.body) };
+  return server(event, context, callback);
 };

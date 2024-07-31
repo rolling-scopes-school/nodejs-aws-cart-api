@@ -19,6 +19,7 @@ const config: JestConfigWithTsJest = {
   ),
   globalSetup: './test/setup.ts',
   globalTeardown: './test/teardown.ts',
+  modulePathIgnorePatterns: ['dist', 'cdk', '.aws-sam'],
 };
 
 export default config;

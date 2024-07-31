@@ -12,7 +12,8 @@ services:
       - POSTGRES_USER=${DEV_POSTGRES_USER}
       - POSTGRES_PASSWORD=${DEV_POSTGRES_PASSWORD}
       - POSTGRES_DB=${DEV_POSTGRES_DB_NAME}
-
+    networks:
+      - rss-aws-shop-backend_cdk-test-network
 
   test-db:
     image: postgres:15-alpine
@@ -24,3 +25,8 @@ services:
       - POSTGRES_USER=${TEST_POSTGRES_USER}
       - POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD}
       - POSTGRES_DB=${TEST_POSTGRES_DB_NAME}
+
+networks:
+  rss-aws-shop-backend_cdk-test-network:
+    external: true
+

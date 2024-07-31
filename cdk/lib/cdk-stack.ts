@@ -32,9 +32,17 @@ export class CdkStack extends cdk.Stack {
           process.env.TEST_DYNAMO_DB_SECRET_ACCESS_KEY!,
         NODE_ENV: process.env.NODE_ENV!,
       },
+      timeout: cdk.Duration.seconds(15),
     });
 
-    const api = new RestApi(this, 'TestApi');
+    const api = new RestApi(this, 'TestApi', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['*'],
+        allowHeaders: ['*'],
+        allowMethods: ['*'],
+        maxAge: cdk.Duration.days(30),
+      },
+    });
     const integration = new LambdaIntegration(nestLambda);
 
     api.root.addMethod(lambda.HttpMethod.GET, integration);
@@ -45,7 +53,11 @@ export class CdkStack extends cdk.Stack {
     const apiEndpoint = api.root.addResource('api');
 
     const authEndpoint = apiEndpoint.addResource('auth');
-    const loginEndpoint = authEndpoint.addResource('profile');
+
+    const registerEndpoint = authEndpoint.addResource('register');
+    registerEndpoint.addMethod(HttpMethod.POST, integration);
+
+    const loginEndpoint = authEndpoint.addResource('login');
     loginEndpoint.addMethod(HttpMethod.POST, integration);
 
     const profileEndpoint = apiEndpoint.addResource('profile');
@@ -56,7 +68,9 @@ export class CdkStack extends cdk.Stack {
     cartEndpoint.addMethod(HttpMethod.PUT, integration);
     cartEndpoint.addMethod(HttpMethod.DELETE, integration);
 
-    const checkoutEndpoint = cartEndpoint.addResource('checkout');
-    checkoutEndpoint.addMethod(HttpMethod.POST, integration);
+    const checkoutEndpoint = cartEndpoint.addResource('order');
+    checkoutEndpoint.addMethod(HttpMethod.GET, integration);
+
+    checkoutEndpoint.addMethod(HttpMethod.PUT, integration);
   }
 }

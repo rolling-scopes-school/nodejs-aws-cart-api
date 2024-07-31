@@ -2,11 +2,14 @@
 
 ## installation
 ```bash
-npm i
+npm i && (cd cdk && npm i)
 ```
 
-## Running the app
-npm i && (cd cdk && npm i)
+create .env file and put there vars from env.example file. Replace values as needed
+
+apply migrations to the database
+```bash
+npm run knex:migrate:latest
 ```
 
 ## build and deploy
@@ -14,28 +17,6 @@ npm i && (cd cdk && npm i)
 npm run build && (cd cdk && cdk synth && cdk deploy)
 ```
 
-create .env file and put there vars from env.example file. Replace values as needed
-
-Run postgres in docker container with command
-```bash
-docker compose up -d
-```
-
-Then apply migrations with command
-```bash
-npm run knex:migrate:latest
-```
-
-## build
-```bash
-npm run build
-```
-
-
-## Run in dev mode
-```bash
-npm run start:dev
-```
 
 To create user and get basic auth token via cli run
 ```bash
@@ -73,11 +54,9 @@ docker compose up -d
 ```bash
 npm run test
 ```
-key `--runInBand` is needed to avoid deadlocks in transactions
 
-## E2E
+## E2E test
 ```bash
 npm run test:e2e
 ```
-
 
