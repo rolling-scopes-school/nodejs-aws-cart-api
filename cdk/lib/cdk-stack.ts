@@ -15,9 +15,6 @@ export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    console.log('CWD', process.cwd());
-    console.log('DB_HOST', process.env.DEV_POSTGRES_HOST);
-
     const nestLambda = new lambda.Function(this, 'NestWrapper', {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset('../dist'),

@@ -1,71 +1,53 @@
 const webpack = require('webpack');
 const path = require('path');
-const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
-const tsConfigFile = path.join(__dirname, './tsconfig.json');
 
-module.exports = {
-  entry: './src/main.ts', // Adjust the entry file accordingly
-  mode: 'production',
-  target: 'node',
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'main.js',
-    clean: true,
-  },
-  resolve: {
-    extensions: ['.ts', '.js'],
+module.exports = (options, webpack) => {
+  const lazyImports = [
+    '@nestjs/microservices',
+    '@nestjs/microservices/microservices-module',
+    '@nestjs/websockets/socket-module',
+    'class-validator',
+    'class-transformer',
+
+    'mariasql',
+    'better-sqlite3',
+    'sqlite3',
+    'mock-aws-s3',
+    'tedious',
+    'nock',
+    'mssql',
+    'mysql',
+    'mysql2',
+    'oracle',
+    'strong-oracle',
+    'oracledb',
+    'pg-native',
+    'pg-query-stream',
+  ];
+
+  return {
+    ...options,
     plugins: [
-      new TsconfigPathsPlugin({
-        configFile: tsConfigFile,
+      ...options.plugins,
+      new webpack.IgnorePlugin({
+        checkResource(resource) {
+          if (lazyImports.includes(resource)) {
+            try {
+              require.resolve(resource);
+            } catch (err) {
+              return true;
+            }
+          }
+          return false;
+        },
       }),
     ],
-  },
-  plugins: [
-    new webpack.IgnorePlugin({
-      checkResource(resource) {
-        const lazyImports = [
-          '@nestjs/microservices',
-          '@nestjs/microservices/microservices-module',
-          '@nestjs/websockets/socket-module',
-          'class-validator',
-          'class-transformer',
-        ];
-        if (!lazyImports.includes(resource)) {
-          return false;
-        }
-        try {
-          require.resolve(resource);
-        } catch (err) {
-          return true;
-        }
-        return false;
-      },
-    }),
-  ],
-
-  externals: {
-    mariasql: 'mariasql',
-    'better-sqlite3': 'better-sqlite3',
-    sqlite3: 'sqlite3',
-    'mock-aws-s3': 'mock-aws-s3',
-    tedious: 'tedious',
-    nock: 'nock',
-    mssql: 'mssql',
-    mysql: 'mysql',
-    mysql2: 'mysql2',
-    oracle: 'oracle',
-    'strong-oracle': 'strong-oracle',
-    oracledb: 'oracledb',
-    'pg-native': 'pg-native',
-    'pg-query-stream': 'pg-query-stream',
-  },
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: 'main.js',
+      clean: true,
+      libraryTarget: 'umd',
+      globalObject: 'this',
+    },
+  };
 };

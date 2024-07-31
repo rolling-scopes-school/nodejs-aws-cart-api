@@ -32,7 +32,7 @@ export class CartController {
       getUserIdFromRequest(req),
     );
 
-    return JSON.stringify(cart.items);
+    return cart.items;
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -80,12 +80,12 @@ export class CartController {
 
     await this.cartService.updateCartStatus(userId);
 
-    return JSON.stringify({ order });
+    return { order };
   }
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  getOrder(): Promise<Order[]> {
+  async getOrder(): Promise<Order[]> {
     return this.orderService.getAll();
   }
 
