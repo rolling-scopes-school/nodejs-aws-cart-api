@@ -60,3 +60,19 @@ npm run test
 npm run test:e2e
 ```
 
+### Test deploy locally with AWS SAM
+1. Install AWS SAM
+2. create .env file and put there vars from env.example file. Replace values as needed
+3. install dependencies with command
+```bash
+npm i && (cd cdk && npm i)
+```
+4. Run database in docker
+```bash
+docker compose up -d
+```
+5. Apply migrations
+```bash
+npm run knex:migrate:latest
+```
+6. 
