@@ -12,7 +12,6 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
     const securityGroupIds = [process.env.DATABASE_SECURITY_GROUP_ID!];
 
     const cartDB = rds.DatabaseInstance.fromDatabaseInstanceAttributes(

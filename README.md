@@ -64,5 +64,4 @@ docker run -d -p 4000:4000 --name kseniari-cart-api kseniari-cart-api:latest
 - test - used for development and testing purposes, not needed in the production
 - Dockerfile - is used to build the image, it is not required inside the image itself
 - sql_queries - SQL scripts are used only to show how were filled the tables
-- cdk - contains configuration and code related to deploying infrastructure, it is not used anymore as we use EB instead of Lambda
-- webpack.config.js - don't need anymore as it is used nest build
+- cart-cdk - contains configuration and code related to deploying infrastructure
