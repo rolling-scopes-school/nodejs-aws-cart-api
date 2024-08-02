@@ -38,5 +38,3 @@ lerna-debug.log*
 !.elasticbeanstalk/*.global.yml
 
 .env
-cdk/node_modules
-.aws-sam
