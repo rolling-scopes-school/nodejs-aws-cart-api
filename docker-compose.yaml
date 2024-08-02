@@ -1,5 +1,18 @@
 version: "3"
 services:
+  cart-api:
+    build: 
+      context: . 
+    container_name: cart-api
+    env_file:
+      - ./.env
+    networks:
+      - rss-aws-shop-backend_cdk-test-network
+    restart: always
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+
+
   dev-db:
     image: postgres:15-alpine
     container_name: dev-postgres

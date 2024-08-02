@@ -1,0 +1,12 @@
+./dist
+./node_modules
+.eslintignore
+.eslintrcjs
+.gitignore
+.prettierc
+.docker-compose.yaml
+Dockerfile
+env.example
+get-token.sh
+README.md
+.env
