@@ -1,39 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { v4 } from 'uuid';
-
+import { randomUUID } from 'crypto';
 import { Order } from '../models';
+import { CreateOrderPayload, OrderStatus } from '../type';
+import { OrderRepository } from './order.repository';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {}
+  constructor(private readonly orderRepository: OrderRepository) {}
 
-  findById(orderId: string): Order {
-    return this.orders[ orderId ];
+  getAll(): Promise<Order[]> {
+    return this.orderRepository.getAll();
   }
 
-  create(data: any) {
-    const id = v4()
-    const order = {
-      ...data,
+  findById(orderId: string): Promise<Order> {
+    return this.orderRepository.getById(orderId);
+  }
+
+  async create(data: CreateOrderPayload) {
+    const id = randomUUID() as string;
+    const order: Order = {
       id,
-      status: 'inProgress',
+      ...data,
+      statusHistory: [
+        {
+          comment: '',
+          status: OrderStatus.Open,
+          timestamp: Date.now(),
+        },
+      ],
     };
 
-    this.orders[ id ] = order;
-
-    return order;
+    await this.orderRepository.create(order);
   }
 
-  update(orderId, data) {
-    const order = this.findById(orderId);
+  // TODO add  type
+  //TODO IMPLEMENT
+  // update(orderId: string, data) {
+  //   const order = this.findById(orderId);
 
-    if (!order) {
-      throw new Error('Order does not exist.');
-    }
+  //   if (!order) {
+  //     throw new Error('Order does not exist.');
+  //   }
 
-    this.orders[ orderId ] = {
-      ...data,
-      id: orderId,
-    }
-  }
+  //   this.orders[orderId] = {
+  //     ...data,
+  //     id: orderId,
+  //   };
+  // }
 }

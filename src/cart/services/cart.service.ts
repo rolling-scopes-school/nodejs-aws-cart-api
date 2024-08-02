@@ -1,31 +1,40 @@
 import { Injectable } from '@nestjs/common';
-
-import { v4 } from 'uuid';
-
-import { Cart } from '../models';
+import { randomUUID } from 'crypto';
+import { Cart, CartStatuses } from '../models';
+import { PutCartPayload } from 'src/order/type';
+import { CartRepository } from './cart.repository';
 
 @Injectable()
 export class CartService {
-  private userCarts: Record<string, Cart> = {};
+  constructor(private readonly cartRepository: CartRepository) {}
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
+  findByUserId(userId: string): Promise<Cart> {
+    if (userId) {
+      return this.cartRepository.findByUserId(userId);
+    }
+
+    return undefined;
   }
 
-  createByUserId(userId: string) {
-    const id = v4();
+  async createByUserId(user_id: string): Promise<Cart> {
+    const timestamp = Date.now();
+
     const userCart = {
-      id,
+      id: randomUUID() as string,
+      user_id,
+      created_at: timestamp,
+      updated_at: timestamp,
+      status: CartStatuses.OPEN,
       items: [],
     };
 
-    this.userCarts[ userId ] = userCart;
+    await this.cartRepository.create(userCart);
 
     return userCart;
   }
 
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
+  async findOrCreateByUserId(userId: string): Promise<Cart> {
+    const userCart = await this.findByUserId(userId);
 
     if (userCart) {
       return userCart;
@@ -34,22 +43,29 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, payload: PutCartPayload): Promise<Cart> {
+    const userCart = await this.findOrCreateByUserId(userId);
 
-    const updatedCart = {
-      id,
-      ...rest,
-      items: [ ...items ],
+    const index = userCart.items.findIndex(
+      ({ product }) => product.id === payload.product.id,
+    );
+
+    if (index === -1) {
+      await this.cartRepository.addCartItem(userCart.id, payload);
+    } else if (payload.count === 0) {
+      await this.cartRepository.removeCartItem(userCart.id, payload);
+    } else {
+      await this.cartRepository.updateCount(userCart.id, payload);
     }
 
-    this.userCarts[ userId ] = { ...updatedCart };
-
-    return { ...updatedCart };
+    return userCart;
   }
 
-  removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
+  updateCartStatus(userId: string): Promise<void> {
+    return this.cartRepository.updateCartStatus(userId);
   }
 
+  removeByUserId(userId: string): Promise<void> {
+    return this.cartRepository.removeCart(userId);
+  }
 }

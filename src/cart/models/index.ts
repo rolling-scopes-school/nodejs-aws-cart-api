@@ -1,26 +1,48 @@
-enum CartStatuses {
+export enum CartStatuses {
   OPEN = 'OPEN',
-  STATUS = 'STATUS'
+  ORDERED = 'ORDERED',
+}
+
+export enum DynamoDBTable {
+  product = 'product',
 }
 
 export type Product = {
-  id: string,
-  title: string,
-  description: string,
-  price: number,
+  id: string;
+  title: string;
+  description: string;
+  price: number;
 };
 
-
 export type CartItem = {
-  product: Product,
-  count: number,
-}
+  product: Product;
+  count: number;
+};
 
 export type Cart = {
-  id: string,
-  user_id: string,
-  created_at: string,
-  updated_at: string,
-  status: CartStatuses,
-  items: CartItem[],
-}
+  id: string;
+  user_id: string;
+  created_at: number;
+  updated_at: number;
+  status: CartStatuses;
+  items: CartItem[];
+};
+
+export type FindCartByIdPGRes = Array<{
+  id: string;
+  user_id: string;
+  created_at: number;
+  updated_at: number;
+  status: CartStatuses;
+  product_id: string;
+  count: number;
+}>;
+
+export type Items = {
+  items: Array<{
+    product_id: string;
+    count: number;
+  }>;
+};
+
+export type PreCart = Omit<Cart, 'items'> & Items;
