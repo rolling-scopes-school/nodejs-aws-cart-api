@@ -1,3 +1,5 @@
+// Used only in task 8 for lamda integration
+
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';

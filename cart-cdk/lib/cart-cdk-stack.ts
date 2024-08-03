@@ -1,3 +1,5 @@
+// Used for proxy API Gateway with Elastic Beanstalk in task 9
+
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';

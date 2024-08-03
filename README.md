@@ -59,9 +59,19 @@ docker run -d -p 4000:4000 --name kseniari-cart-api kseniari-cart-api:latest
 
 #### .dockerignore explanations:
 
+### The following directories are excluded from docker image:
+
 - dist - during the Docker build process the dist folder is generated in the build stage
 - node_modules - during the Docker build process the dependencies are generated in the dependencies stage
 - test - used for development and testing purposes, not needed in the production
 - Dockerfile - is used to build the image, it is not required inside the image itself
 - sql_queries - SQL scripts are used only to show how were filled the tables
-- cart-cdk - contains configuration and code related to deploying infrastructure
+- cart-cdk, cdk - contains configuration and code related to deploying infrastructure, not needed in the image
+
+#### Docker is udsed to create enviroment on AWS Elastic Beanstalk service.
+
+#### EB domain: http://kseniari-cart-api-develop.eu-west-1.elasticbeanstalk.com/
+
+#### Proxy API Gateway for EB: https://c60y43de2i.execute-api.eu-west-1.amazonaws.com/dev
+
+### FE link: https://d3r5s5dc64z7tm.cloudfront.net
