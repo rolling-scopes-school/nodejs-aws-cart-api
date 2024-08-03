@@ -11,6 +11,7 @@ export class CartCdkStack extends cdk.Stack {
 
     const api = new apigateway.RestApi(this, 'eb-cart-api', {
       restApiName: 'EB Cart Service',
+      cloudWatchRole: true,
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -43,5 +44,14 @@ export class CartCdkStack extends cdk.Stack {
     );
 
     proxyResource.addMethod('ANY', httpIntegration, methodOptions);
+
+    const deployment = new apigateway.Deployment(this, 'Deployment', { api });
+
+    const devStage = new apigateway.Stage(this, 'dev-stage', {
+      stageName: 'dev',
+      deployment,
+    });
+
+    api.deploymentStage = devStage;
   }
 }
