@@ -1,29 +1,35 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Cart } from '../cart/cart.entity';
 
 @Entity('orders')
-export class OrderEntity {
+export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column()
   user_id: string;
 
-  @ManyToOne(() => Cart)
+  @ManyToOne(() => Cart, (cart) => cart.orders)
   cart: Cart;
 
-  @Column({ type: 'json' })
-  payment: Record<string, any>;
+  @Column({ type: 'jsonb' })
+  payment: any;
 
-  @Column({ type: 'json' })
-  delivery: Record<string, any>;
+  @Column({ type: 'jsonb' })
+  delivery: any;
 
   @Column({ type: 'text', nullable: true })
   comments: string;
 
-  @Column({ type: 'enum', enum: ['ORDERED', 'SHIPPED', 'DELIVERED', 'CANCELLED'] })
-  status: 'ORDERED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  @Column({ type: 'enum', enum: ['PENDING', 'COMPLETED'], default: 'PENDING' })
+  status: 'PENDING' | 'COMPLETED';
 
-  @Column({ type: 'numeric' })
+  @Column({ type: 'decimal' })
   total: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }
