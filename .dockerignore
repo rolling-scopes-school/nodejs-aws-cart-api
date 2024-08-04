@@ -1,0 +1,22 @@
+node_modules
+dist
+*.log
+*.ts
+*.map
+coverage
+.git
+.env
+.DS_Store
+docker-compose.yml
+
+# Explanation:
+# node_modules: Node.js dependencies will be installed in the Docker image.
+# dist: Compiled output directory, will be created in the Docker image.
+# *.log: Log files are not needed in the Docker image.
+# *.ts: TypeScript source files, only compiled files are needed.
+# *.map: Source map files are not needed in the Docker image.
+# coverage: Test coverage reports are not needed in the Docker image.
+# .git: Version control folder is not needed in the Docker image.
+# .env: Environment variables should be managed securely and not hardcoded in the image.
+# .DS_Store: macOS system file, not needed in the Docker image.
+# docker-compose.yml: Compose file is for development, not needed in the image.
