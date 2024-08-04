@@ -2,6 +2,7 @@ import { Controller, Get, Delete, Put, Body, Req, Post, UseGuards, HttpStatus } 
 
 // import { BasicAuthGuard, JwtAuthGuard } from '../auth';
 import { OrderService } from '../order';
+import { OrderEntity } from '../order/order.entity';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 
 import { calculateCartTotal } from './models-rules';
@@ -55,38 +56,48 @@ export class CartController {
     }
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @UseGuards(BasicAuthGuard)
+  // // @UseGuards(JwtAuthGuard)
+  // // @UseGuards(BasicAuthGuard)
+  // @Post('checkout')
+  // checkout(@Req() req: AppRequest, @Body() body) {
+  //   const userId = getUserIdFromRequest(req);
+  //   const cart = this.cartService.findByUserId(userId);
+  //
+  //   if (!(cart && cart.items.length)) {
+  //     const statusCode = HttpStatus.BAD_REQUEST;
+  //     req.statusCode = statusCode
+  //
+  //     return {
+  //       statusCode,
+  //       message: 'Cart is empty',
+  //     }
+  //   }
+  //
+  //   const { id: cartId, items } = cart;
+  //   const total = calculateCartTotal(cart);
+  //   const order = this.orderService.create({
+  //     ...body, // TODO: validate and pick only necessary data
+  //     userId,
+  //     cartId,
+  //     items,
+  //     total,
+  //   });
+  //   this.cartService.removeByUserId(userId);
+  //
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: 'OK',
+  //     data: { order }
+  //   }
+  // }
+
   @Post('checkout')
-  checkout(@Req() req: AppRequest, @Body() body) {
-    const userId = getUserIdFromRequest(req);
-    const cart = this.cartService.findByUserId(userId);
-
-    if (!(cart && cart.items.length)) {
-      const statusCode = HttpStatus.BAD_REQUEST;
-      req.statusCode = statusCode
-
-      return {
-        statusCode,
-        message: 'Cart is empty',
-      }
-    }
-
-    const { id: cartId, items } = cart;
-    const total = calculateCartTotal(cart);
-    const order = this.orderService.create({
-      ...body, // TODO: validate and pick only necessary data
-      userId,
-      cartId,
-      items,
-      total,
-    });
-    this.cartService.removeByUserId(userId);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'OK',
-      data: { order }
-    }
+  async checkout(
+    @Body('userId') userId: string,
+    @Body('payment') payment: any,
+    @Body('delivery') delivery: any,
+    @Body('comments') comments: string
+  ): Promise<OrderEntity> {
+    return this.cartService.checkout(userId, payment, delivery, comments);
   }
 }

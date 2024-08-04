@@ -1,53 +1,45 @@
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Construct } from 'constructs';
-import { Runtime } from "aws-cdk-lib/aws-lambda";
-import {
-  LambdaIntegration,
-  RestApi,
-  Cors,
-} from 'aws-cdk-lib/aws-apigateway';
-import {
-  PolicyStatement,
-  Effect,
-} from 'aws-cdk-lib/aws-iam';
-import {
-  Bucket,
-  HttpMethods,
-  EventType,
-  BlockPublicAccess,
-} from 'aws-cdk-lib/aws-s3';
-import {
-  LambdaDestination,
-} from 'aws-cdk-lib/aws-s3-notifications';
+import * as cdk from '@aws-cdk/core';
+import * as lambda from '@aws-cdk/aws-lambda';
+import * as apigateway from '@aws-cdk/aws-apigateway';
+import { join } from 'path';
+import * as rds from '@aws-cdk/aws-rds';
+import * as ec2 from '@aws-cdk/aws-ec2';
 
-export class CdkStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+export class CdkStack extends cdk.Stack {
+  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-    
-    /*// Load environment variables from .env file
-    const environment: { [key: string]: string } = {};
 
-    for (const key in process.env) {
-      if (process.env.hasOwnProperty(key) && process.env[key]) {
-        environment[key] = process.env[key] as string;
-      }
-    }
-    console.log(`ENVIRONMENT: ${JSON.stringify(environment)}`)*/
-    // Lambda function for authorizing users
-    const basicAuthorizer = new NodejsFunction(this, 'BasicAuthorizer', {
-      runtime: Runtime.NODEJS_20_X,
-      entry: 'src/basicAuthorizer.ts',
-      handler: 'handler',
+    const vpc = new ec2.Vpc(this, 'VPC');
+
+    const database = new rds.DatabaseInstance(this, 'UserServiceDB', {
+      engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_12_4 }),
+      vpc,
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE2, ec2.InstanceSize.MICRO),
+      credentials: rds.Credentials.fromGeneratedSecret('admin'),
+      databaseName: 'userdb',
+      publicly accessible: true,
+  });
+
+    const userServiceLambda = new lambda.Function(this, 'UserServiceLambda', {
+      runtime: lambda.Runtime.NODEJS_14_X,
+      handler: 'lambda.handler',
+      code: lambda.Code.fromAsset(join(__dirname, '..', '..', 'dist')),
       environment: {
-        bdvx: 'TEST_PASSWORD'
-      }
+        NODE_ENV: 'production',
+        DB_HOST: database.dbInstanceEndpointAddress,
+        DB_PORT: database.dbInstanceEndpointPort,
+        DB_USERNAME: database.secret?.secretValueFromJson('username')?.toString() || '',
+        DB_PASSWORD: database.secret?.secretValueFromJson('password')?.toString() || '',
+        DB_NAME: 'userdb',
+      },
     });
 
-    new CfnOutput(this, 'BasicAuthorizerArn', {
-      value: basicAuthorizer.functionArn,
-      exportName: 'BasicAuthorizerArn',
+    const api = new apigateway.RestApi(this, 'userServiceApi', {
+      restApiName: 'User Service',
+      description: 'This service serves users.',
     });
 
+    const getUsersIntegration = new apigateway.LambdaIntegration(userServiceLambda);
+    api.root.addMethod('GET', getUsersIntegration);
   }
 }

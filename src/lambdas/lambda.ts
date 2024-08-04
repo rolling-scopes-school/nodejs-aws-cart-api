@@ -1,20 +1,28 @@
-import { Handler, Context, Callback } from 'aws-lambda';
-import { Server } from 'http';
-import { createServer, proxy } from 'aws-serverless-express';
-import { AppModule } from '../app.module';
+import { Handler, Context } from 'aws-lambda';
 import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import * as express from 'express';
+import { Server } from 'http';
+import { config as dotEnvConfig } from 'dotenv';
+import { resolve } from 'path';
 
-let cachedServer: Server;
+dotEnvConfig({ path: resolve(__dirname, '.env') });
 
-const bootstrapServer = async (): Promise<Server> => {
-  const app = await NestFactory.create(AppModule);
+const expressApp = express();
+
+let server: Server;
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
   await app.init();
-  return createServer(app.getHttpAdapter().getInstance());
-};
+  return expressApp;
+}
 
-export const handler: Handler = async (event: any, context: Context, callback: Callback) => {
-  if (!cachedServer) {
-    cachedServer = await bootstrapServer();
+export const handler: Handler = async (event: any, context: Context) => {
+  if (!server) {
+    server = await bootstrap();
   }
-  return proxy(cachedServer, event, context, 'PROMISE').promise;
+
+  return server(event, context);
 };
