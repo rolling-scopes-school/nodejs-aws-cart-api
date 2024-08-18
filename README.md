@@ -6,7 +6,7 @@
 [travis-url]: https://travis-ci.org/nestjs/nest
 [linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
 [linux-url]: https://travis-ci.org/nestjs/nest
-  
+
   <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications, heavily inspired by <a href="https://angular.io" target="blank">Angular</a>.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
@@ -47,29 +47,31 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+## Docker conteiner
 
-```bash
-# unit tests
-$ npm run test
+#### build image:
 
-# e2e tests
-$ npm run test:e2e
+docker build -t kseniari-cart-api .
 
-# test coverage
-$ npm run test:cov
-```
+#### run container:
 
-## Support
+docker run -d -p 4000:4000 --name kseniari-cart-api kseniari-cart-api:latest
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### .dockerignore explanations:
 
-## Stay in touch
+### The following directories are excluded from docker image:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- dist - during the Docker build process the dist folder is generated in the build stage
+- node_modules - during the Docker build process the dependencies are generated in the dependencies stage
+- test - used for development and testing purposes, not needed in the production
+- Dockerfile - is used to build the image, it is not required inside the image itself
+- sql_queries - SQL scripts are used only to show how were filled the tables
+- cart-cdk, cdk - contains configuration and code related to deploying infrastructure, not needed in the image
 
-## License
+#### Docker is udsed to create enviroment on AWS Elastic Beanstalk service.
 
-  Nest is [MIT licensed](LICENSE).
+#### EB domain: http://kseniari-cart-api-develop.eu-west-1.elasticbeanstalk.com/
+
+#### Proxy API Gateway for EB: https://c60y43de2i.execute-api.eu-west-1.amazonaws.com/dev
+
+### FE link: https://d3r5s5dc64z7tm.cloudfront.net
