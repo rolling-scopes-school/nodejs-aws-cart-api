@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getUserIdFromRequest = getUserIdFromRequest;
+/**
+ * @param {AppRequest} request
+ * @returns {string}
+ */
+function getUserIdFromRequest(request) {
+    return request.user && request.user.id;
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJpbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQU1BLG9EQUVDO0FBTkQ7OztHQUdHO0FBQ0gsU0FBZ0Isb0JBQW9CLENBQUMsT0FBbUI7SUFDdEQsT0FBTyxPQUFPLENBQUMsSUFBSSxJQUFJLE9BQU8sQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDO0FBQ3pDLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBBcHBSZXF1ZXN0IH0gZnJvbSAnLi4vbW9kZWxzJztcblxuLyoqXG4gKiBAcGFyYW0ge0FwcFJlcXVlc3R9IHJlcXVlc3RcbiAqIEByZXR1cm5zIHtzdHJpbmd9XG4gKi9cbmV4cG9ydCBmdW5jdGlvbiBnZXRVc2VySWRGcm9tUmVxdWVzdChyZXF1ZXN0OiBBcHBSZXF1ZXN0KTogc3RyaW5nIHtcbiAgcmV0dXJuIHJlcXVlc3QudXNlciAmJiByZXF1ZXN0LnVzZXIuaWQ7XG59XG4iXX0=
